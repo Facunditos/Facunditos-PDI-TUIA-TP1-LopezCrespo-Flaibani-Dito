@@ -1,3 +1,11 @@
+'''
+De uno de los archivos examen.png se separa el encabezado: header y cada una de las 10 preguntas en una imagen distinta: questions[]
+con el objetivo de detectar la zona de la respuesta
+Falta obtener nombre y apellido, fecha? y clase
+Falta armar una estructura por alumno con sus 10 respuestas y su nota
+Falta comparar cada imagen de la respuesta y saber qué letra es??
+'''
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,14 +36,6 @@ imshow(gray)
 #--------------------------------
 # Area Preguntas
 #--------------------------------
-
-# th=90
-# image_th = image.copy()
-# image_th[image_th > th] = 255
-# imshow(image_th)
-
-# image_th[image_th <= th] = 0
-# imshow(image_th)
 
 edges = cv2.Canny(gray, 100, 170, apertureSize=3)
 # imshow(edges)
@@ -99,78 +99,19 @@ for idx, question in enumerate(questions):
 
 plt.tight_layout()
 plt.show()
-# imshow(questions[0])
 
 # Hasta acá OK
+
+
 #--------------------------------
 # Area Respuestas
 #--------------------------------
-answers = []
-
-for idx, question in enumerate(questions):
-    question_gray = cv2.cvtColor(question, cv2.COLOR_BGR2GRAY)
-    question_edges = cv2.Canny(question_gray, 100, 170, apertureSize=3)
-    image_lines = question.copy()
-    sheet = np.zeros(question.shape, dtype=np.uint8)
-    lines = cv2.HoughLines(question_edges, rho=1, theta=np.pi/180, threshold=100)#22lineas los bordes
-    # lines_v = []
-    lines_h = []
-    for i in range(0, len(lines)):
-        rho = lines[i][0][0]
-        theta = lines[i][0][1]
-        a=np.cos(theta)
-        b=np.sin(theta)
-        x0=a*rho
-        y0=b*rho
-        x1=int(x0+1000*(-b))
-        y1=int(y0+1000*(a))
-        x2=int(x0-1000*(-b))
-        y2=int(y0-1000*(a))
-        # if y1==1000:
-        #     lines_v.append(((x1,y1),(x2,y2)))
-        if x1==-1000:
-            lines_h.append(((x1,y1),(x2,y2)))
-        cv2.line(image_lines,(x1,y1),(x2,y2),(0,255,0),2)
-        cv2.line(sheet,(x1,y1),(x2,y2),(0,255,0),2)
-
-    # Ordenar las listas porque Hough no genera las líneas en orden
-    # lines_v_sorted = sorted(lines_v, key=lambda line: line[0][0])
-    lines_h_sorted = sorted(lines_h, key=lambda line: line[0][1])
-
-    # imshow(image_lines)
-    # imshow(sheet)
-
-    # answer = question[lines_h_sorted[0][0][1]-10:lines_h_sorted[0][0][1]+1, image_lines.shape[1]-150:image_lines.shape[1]]
-    answer = question[lines_h_sorted[-1][0][1]-14:lines_h_sorted[-1][0][1]-1, 0:image_lines.shape[1]]
-    answers.append(answer)
-    
-
-imshow(answers[1])
-
-# Mostrar todas las preguntas en subplots
-fig, axes = plt.subplots(2, 5, figsize=(15, 6))
-axes = axes.ravel()
-for idx, answer in enumerate(answers):
-    # cv2.imwrite("Questions/" + 'question' +  str(idx + 1) + ".png", question, [cv2.IMWRITE_JPEG_QUALITY, 90])
-
-    axes[idx].imshow(answer, cmap='gray')
-    axes[idx].set_title(f'Pregunta {idx + 1}')
-    axes[idx].axis('off')
-
-plt.tight_layout()
-plt.show()
-
-imshow(answer[0])
-
-
-
-
-
-
-
 
 #--------------------------------
 # Componentes conectadas
+# para segmentar las letras directamente de cada imagen de pregunta
+# No detecta los límites exactos de la letra supuestamente por el procesamiento previo de la imagen para tener una imagen binaria
+# hay 4 pruebas distintas de procesamiento previo de la imagen
 #--------------------------------
 # Forma 1
 def letter_highlight(image):
@@ -245,7 +186,7 @@ for i, st in enumerate(stats):
 imshow(img=output_image, color_img=True)
 
 
-#Forma 3
+# Forma 3
 j = 4
 imshow(questions[j])
 # Convertir la imagen a escala de grises
@@ -275,20 +216,6 @@ for i, st in enumerate(stats):
 imshow(img=output_image, color_img=True)
 
 # Forma 4
-# def letter_highlight(image):
-#     img = image.copy()
-#     imshow(img)
-#     mask = (img[:, :, 0] == img[:, :, 1]) & \
-#         (img[:, :, 1] == img[:, :, 2]) & \
-#         (img[:, :, 0] != 0)  # Excluir (0, 0, 0)
-#     # Cambiar los píxeles que cumplen con R=G=B a blanco (255, 255, 255)
-#     img[mask] = [255, 255, 255]
-#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-#     th=250
-#     gray[gray > th] = 255
-#     gray[gray <= th] = 0
-#     return gray
 
 j=1
 imshow(questions[j])
@@ -319,6 +246,67 @@ for i, st in enumerate(stats):
 # Mostrar la imagen con los rectángulos dibujados
 imshow(img=output_image, color_img=True)
 
+#--------------------------------
+# Hough
+# para segmentar con la linea debajo de cada letras de cada imagen de pregunta
+# para luego detectar solo el componente conectado de la letra
+# problemas para detectar las líneas en todas las imágenes, en algunas funciona y otras, no
+# dependiendo de la ubicación y el threshold
+#--------------------------------
+
+answers = []
+
+for idx, question in enumerate(questions):
+    question_gray = cv2.cvtColor(question, cv2.COLOR_BGR2GRAY)
+    question_edges = cv2.Canny(question_gray, 100, 170, apertureSize=3)
+    image_lines = question.copy()
+    sheet = np.zeros(question.shape, dtype=np.uint8)
+    lines = cv2.HoughLines(question_edges, rho=1, theta=np.pi/180, threshold=100)#22lineas los bordes
+    # lines_v = []
+    lines_letter_h = []
+    for i in range(0, len(lines)):
+        rho = lines[i][0][0]
+        theta = lines[i][0][1]
+        a=np.cos(theta)
+        b=np.sin(theta)
+        x0=a*rho
+        y0=b*rho
+        x1=int(x0+1000*(-b))
+        y1=int(y0+1000*(a))
+        x2=int(x0-1000*(-b))
+        y2=int(y0-1000*(a))
+        # if y1==1000:
+        #     lines_v.append(((x1,y1),(x2,y2)))
+        if x1==-1000:
+            lines_letter_h.append(((x1,y1),(x2,y2)))
+        cv2.line(image_lines,(x1,y1),(x2,y2),(0,255,0),2)
+        cv2.line(sheet,(x1,y1),(x2,y2),(0,255,0),2)
+
+    # Ordenar las listas porque Hough no genera las líneas en orden
+    # lines_v_sorted = sorted(lines_v, key=lambda line: line[0][0])
+    lines_letter_h_sorted = sorted(lines_letter_h, key=lambda line: line[0][1])
+
+    # imshow(image_lines)
+    # imshow(sheet)
+
+    # answer = question[lines_h_sorted[0][0][1]-10:lines_h_sorted[0][0][1]+1, image_lines.shape[1]-150:image_lines.shape[1]]
+    answer = question[lines_letter_h_sorted[-1][0][1]-14:lines_h_sorted[-1][0][1]-1, 0:image_lines.shape[1]]
+    answers.append(answer)
 
 
+imshow(answers[1])
 
+# Mostrar todas las preguntas en subplots
+fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+axes = axes.ravel()
+for idx, answer in enumerate(answers):
+    # cv2.imwrite("Questions/" + 'question' +  str(idx + 1) + ".png", question, [cv2.IMWRITE_JPEG_QUALITY, 90])
+
+    axes[idx].imshow(answer, cmap='gray')
+    axes[idx].set_title(f'Pregunta {idx + 1}')
+    axes[idx].axis('off')
+
+plt.tight_layout()
+plt.show()
+
+imshow(answer[0])
