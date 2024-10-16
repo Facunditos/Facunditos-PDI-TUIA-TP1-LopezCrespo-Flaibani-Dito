@@ -28,6 +28,54 @@ def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, color
     if new_fig:
         plt.show(block=blocking)
 
+
+def identify_letter(img):
+
+    # Convertir a escala de grises
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Suavizar la imagen y aplicar binarización
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Detectar contornos
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    if (len(contours) == 2): return "B"
+    elif (len(contours) == 0): return "C"
+    elif (len(contours) == 1): #"A" o "D"
+
+        return "B"
+    else: return "X"
+    # # Analizar contornos
+    # for contour in contours:
+    #     # Calcular el área y el perímetro
+    #     area = cv2.contourArea(contour)
+    #     perimeter = cv2.arcLength(contour, True)
+        
+    #     # Obtener la jerarquía (para contar contornos hijos, etc.)
+    #     # En este caso, 'hierarchy' es una lista de la jerarquía de contornos
+    #     # Puedes usarla para contar cuántos contornos hijos tiene cada uno.
+        
+    #     # Aproximar el contorno a un polígono
+    #     epsilon = 0.02 * perimeter
+    #     approx = cv2.approxPolyDP(contour, epsilon, True)
+        
+    #     # Mostrar los resultados
+    #     print(f"Área: {area}, Perímetro: {perimeter}, Lados: {len(approx)}")
+        
+        # Comparar formas si tienes contornos de referencia (opcional)
+        # hu_moments = cv2.HuMoments(cv2.moments(contour)).flatten()
+        # Puedes comparar hu_moments con momentos de referencia
+
+    # # Mostrar los contornos en la imagen
+    # cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
+    # cv2.imshow("Contornos", img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+
+#--------------------------------
 image = cv2.imread('examen_3.png')
 np.unique(image)
 len(np.unique(image))
@@ -35,6 +83,9 @@ imshow(image)
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
 imshow(gray)
+
+
+
 
 #--------------------------------
 # Area Preguntas
@@ -137,10 +188,10 @@ def letter_highlight(image):
     gray[gray <= th] = 0
     return gray
 
-fig, axs = plt.subplots(2, 5, figsize=(15, 6))  # Crear una cuadrícula de 2 filas y 5 columnas
 
+fig, axs = plt.subplots(2, 5, figsize=(15, 6))  # Crear una cuadrícula de 2 filas y 5 columnas
+answers = []
 for j in range(10):
-    # imshow(questions[j])
     image_th = letter_highlight(questions[j])
     # imshow(image_th)
     connectivity = 8
@@ -154,13 +205,17 @@ for j in range(10):
     for i, st in enumerate(stats):
         x, y, w, h, area = st
         if 10 < area < 500:
-            margin = 5  # El valor de margen
+            margin = 2  # El valor de margen
             x_new = max(x - margin, 0)
             y_new = max(y - margin, 0)
             w_new = min(w + 2*margin, output_image.shape[1] - x_new)
             h_new = min(h + 2*margin, output_image.shape[0] - y_new)
-            cv2.rectangle(output_image, (x, y), (x + w, y + h), color=(0, 255, 0), thickness=1)
-
+            # cv2.rectangle(output_image, (x, y), (x + w, y + h), color=(0, 255, 0), thickness=1)
+            cv2.rectangle(output_image, (x_new, y_new), (x_new + w_new, y_new + h_new), color=(0, 255, 0), thickness=1)
+            # answer = questions[j][y:y+h, x:x+w]
+            answer = image_th[y:y+h, x:x+w]
+            # imshow(letter)
+            answers.append(answer)
     # Convertir la imagen de BGR (OpenCV) a RGB para mostrarla correctamente en Matplotlib
     output_image_rgb = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
 
@@ -172,6 +227,88 @@ for j in range(10):
 
 plt.tight_layout()  # Ajustar el espaciado entre subtramas
 plt.show()
+
+# Mostrar todas las preguntas en subplots
+fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+axes = axes.ravel()
+
+for idx, answer in enumerate(answers):
+    cv2.imwrite("Answers/" + 'answer' +  str(idx + 1) + ".png", answer, [cv2.IMWRITE_JPEG_QUALITY, 90])
+
+    axes[idx].imshow(answer, cmap='gray')
+    axes[idx].set_title(f'Respuesta {idx + 1}')
+    axes[idx].axis('off')
+
+plt.tight_layout()
+plt.show()
+
+
+# for idx, answer in enumerate(answers):
+    # identify_letter(answer)
+
+# Preprocesamiento
+# answers[0] C 1 contorno
+# answers[1] B 2 contornos 2 2 0
+# answers[2] A 2 contornos
+# answers[3] D 1 contorno 1 1 0
+# Función para verificar si un contorno está cerrado
+def es_contorno_cerrado(contorno):
+    # El contorno está cerrado si el primer punto y el último son iguales
+    return (contorno[0][0] == contorno[-1][0]).all()
+
+k=3
+# gray = cv2.cvtColor(answers[k], cv2.COLOR_BGR2GRAY)
+# blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+_, img_le = cv2.threshold(answers[k], 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+# img_le = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# img_le = cv2.GaussianBlur(img_le, (5, 5), 0)
+imshow(answers[k])
+# imshow(gray)
+# imshow(blurred)
+imshow(img_le)
+# Obtención de contornos
+contornos, jerarquia = cv2.findContours(img_le, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+len(contornos)
+cc=0
+ca=0
+for contorno in contornos:
+    if es_contorno_cerrado(contorno):
+        cc+=1
+    else:
+        ca+=1
+print(len(contornos), ca, cc)
+
+if len(contornos)>=2:
+    letra='B'
+
+
+siguiente, anterior, primer_hijo, padre = jerarquia[0][0]
+
+# Si primer_hijo es -1, no tiene hijos; si es distinto de -1, tiene un hijo.
+if primer_hijo != -1:
+    print(f"Contorno 0 tiene un hijo con índice {primer_hijo}")
+    
+    # Ahora contamos cuántos hijos tiene contornos[0]
+    num_hijos = 0
+    hijo = primer_hijo
+    while hijo != -1:
+        num_hijos += 1
+        siguiente_hijo = jerarquia[0][hijo][0]  # Accedemos al siguiente contorno en el mismo nivel
+        hijo = siguiente_hijo
+
+    print(f"Contorno 0 tiene {num_hijos} hijos.")
+else:
+    print("Contorno 0 no tiene hijos.")
+
+# Análisis de características
+# caracteristicas = []
+for contorno in contornos:
+    area = cv2.contourArea(contorno)
+    x, y, w, h = cv2.boundingRect(contorno)
+    relacion_aspecto = float(w)/h
+    cantidad_contornos_hijos = len(cv2.findContours(contorno, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)[0])
+    print(area, relacion_aspecto, cantidad_contornos_hijos)
+    caracteristicas.append([area, relacion_aspecto, cantidad_contornos_hijos])
 
 
 # Forma 2
@@ -495,5 +632,89 @@ inverted_image = 255 - image
 
 # Mostrar la imagen invertida
 cv2.imshow('Imagen Invertida', inverted_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#---------------
+# Comparación de imágenes para saber qué letra seleccionó cada alumno
+#---------------
+
+# 1. Comparar imágenes por diferencias pixel a pixel
+# Esta técnica simplemente calcula la diferencia absoluta entre los valores de los píxeles de las dos imágenes. 
+# Si las imágenes son iguales, la diferencia será cero para todos los píxeles.
+import cv2
+import numpy as np
+
+# Cargar las imágenes
+img1 = cv2.imread('imagen1.png', cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread('imagen2.png', cv2.IMREAD_GRAYSCALE)
+
+# Restar las imágenes
+diferencia = cv2.absdiff(img1, img2)
+
+# Mostrar la diferencia
+cv2.imshow('Diferencia', diferencia)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Calcular la cantidad de píxeles diferentes
+if np.count_nonzero(diferencia) == 0:
+    print("Las imágenes son iguales")
+else:
+    print("Las imágenes son diferentes")
+
+
+# 2. Comparar usando histogramas
+# Puedes comparar las imágenes basándote en sus histogramas, que representan la distribución de los píxeles. 
+# OpenCV tiene la función cv2.compareHist que te permite comparar histogramas y determinar cuán similares son dos imágenes.
+import cv2
+
+# Cargar las imágenes
+img1 = cv2.imread('imagen1.png')
+img2 = cv2.imread('imagen2.png')
+
+# Convertir las imágenes a escala de grises
+img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
+# Calcular los histogramas
+hist1 = cv2.calcHist([img1_gray], [0], None, [256], [0, 256])
+hist2 = cv2.calcHist([img2_gray], [0], None, [256], [0, 256])
+
+# Normalizar los histogramas
+hist1 = cv2.normalize(hist1, hist1)
+hist2 = cv2.normalize(hist2, hist2)
+
+# Comparar los histogramas
+comparacion = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+print(f"Similitud de las imágenes: {comparacion}")
+
+# 3. Comparar usando características (ORB, SIFT, o SURF)
+# Este método consiste en extraer características de las imágenes y luego compararlas. 
+# Puedes utilizar detectores como ORB, SIFT o SURF (aunque SIFT y SURF requieren instalar OpenCV con contrib).
+# Aquí tienes un ejemplo usando ORB (que es rápido y no requiere una versión especial de OpenCV):
+
+import cv2
+
+# Cargar las imágenes
+img1 = cv2.imread('imagen1.png', cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread('imagen2.png', cv2.IMREAD_GRAYSCALE)
+
+# Detectar y describir características con ORB
+orb = cv2.ORB_create()
+kp1, des1 = orb.detectAndCompute(img1, None)
+kp2, des2 = orb.detectAndCompute(img2, None)
+
+# Usar un matcher para comparar los descriptores
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+matches = bf.match(des1, des2)
+
+# Ordenar las coincidencias por distancia
+matches = sorted(matches, key=lambda x: x.distance)
+
+# Mostrar las mejores coincidencias
+img_matches = cv2.drawMatches(img1, kp1, img2, kp2, matches[:10], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+cv2.imshow('Coincidencias', img_matches)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
