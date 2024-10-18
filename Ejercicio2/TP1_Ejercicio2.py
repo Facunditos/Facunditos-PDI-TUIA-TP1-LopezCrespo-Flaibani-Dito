@@ -250,6 +250,37 @@ for exam in exams:
     # Mostrar si aprobó o no
     print(f"Resultado: {exam['passed']}")
 
+import csv
+
+# Guardar los exámenes corregidos en un archivo CSV
+output_csv = 'Ejercicio2/resultados_examenes.csv'
+
+with open(output_csv, mode='w', newline='') as f:
+    writer = csv.writer(f)
+
+    # Escribir encabezados
+    writer.writerow(["Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
+
+    for exam in exams:
+        for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+            writer.writerow([exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
+
+# Guardar los exámenes corregidos en un archivo de texto
+output_file = 'Ejercicio2/resultados_examenes.txt'
+
+with open(output_file, 'w') as f:
+    for exam in exams:
+        f.write(f"\nNombre: {exam['name']}\n")
+        f.write(f"Fecha: {exam['date']}\n")
+        f.write(f"Clase: {exam['class']}\n")
+        f.write("Respuestas:\n")
+
+        # Recorrer las respuestas y mostrar si son OK o MAL
+        for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+            f.write(f"Pregunta {idx}: {value['state']}\n")
+
+        # Mostrar si aprobó o no
+        f.write(f"Resultado: {exam['passed']}\n")
 
 #---------------
 # Notas

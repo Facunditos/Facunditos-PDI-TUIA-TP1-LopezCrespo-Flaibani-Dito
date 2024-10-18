@@ -1,0 +1,80 @@
+
+Nombre: Student_1
+Fecha: 
+Clase: 1
+Respuestas:
+Pregunta 1: MAL
+Pregunta 2: MAL
+Pregunta 3: MAL
+Pregunta 4: MAL
+Pregunta 5: MAL
+Pregunta 6: MAL
+Pregunta 7: MAL
+Pregunta 8: MAL
+Pregunta 9: MAL
+Pregunta 10: MAL
+Resultado: NO APR
+
+Nombre: Student_2
+Fecha: 
+Clase: 1
+Respuestas:
+Pregunta 1: MAL
+Pregunta 2: MAL
+Pregunta 3: MAL
+Pregunta 4: OK
+Pregunta 5: MAL
+Pregunta 6: OK
+Pregunta 7: OK
+Pregunta 8: MAL
+Pregunta 9: MAL
+Pregunta 10: OK
+Resultado: NO APR
+
+Nombre: Student_3
+Fecha: 
+Clase: 1
+Respuestas:
+Pregunta 1: OK
+Pregunta 2: OK
+Pregunta 3: OK
+Pregunta 4: OK
+Pregunta 5: OK
+Pregunta 6: OK
+Pregunta 7: OK
+Pregunta 8: OK
+Pregunta 9: OK
+Pregunta 10: OK
+Resultado: APR
+
+Nombre: Student_4
+Fecha: 
+Clase: 1
+Respuestas:
+Pregunta 1: MAL
+Pregunta 2: MAL
+Pregunta 3: MAL
+Pregunta 4: MAL
+Pregunta 5: MAL
+Pregunta 6: MAL
+Pregunta 7: MAL
+Pregunta 8: MAL
+Pregunta 9: MAL
+Pregunta 10: MAL
+Resultado: NO APR
+
+Nombre: Student_5
+Fecha: 
+Clase: 1
+Respuestas:
+Pregunta 1: OK
+Pregunta 2: OK
+Pregunta 3: OK
+Pregunta 4: OK
+Pregunta 5: OK
+Pregunta 6: OK
+Pregunta 7: OK
+Pregunta 8: OK
+Pregunta 9: OK
+Pregunta 10: OK
+Resultado: APR
