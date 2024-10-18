@@ -151,11 +151,11 @@ def indetify_answers(lines_anwser: list) -> list:
 
                 # Ahora contamos cuántos hijos tiene contours[0]
                 # child_count = 0
-                hijo = first_child
-                while hijo != -1:
+                child = first_child
+                while child != -1:
                     child_count += 1
-                    siguiente_hijo = hierarchy[0][hijo][0]  # Siguiente contorno en el mismo nivel
-                    hijo = siguiente_hijo
+                    next_child = hierarchy[0][child][0]  # Siguiente contorno en el mismo nivel
+                    child = next_child
 
                 if child_count==2: letter="B"
                 elif child_count==1:
