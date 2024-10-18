@@ -47,7 +47,7 @@ def local_histogram_equalization(image, window_size):
 
     return output_image
 
-image = cv2.imread('Imagen_con_detalles_escondidos.tif', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('Ejercicio1/Imagen_con_detalles_escondidos.tif', cv2.IMREAD_GRAYSCALE)
 
 # Pruebas
 np.unique(image)
@@ -68,11 +68,11 @@ imshow(prueba)
 
 # Aplicar ecualización local del histograma con una ventana de tamaño 15x15
 # window_size = (3, 3)
-window_size = (25,25)
+window_size = (25, 25)
 equalized_image = local_histogram_equalization(image, window_size)
 
 # Guardar el resultado
-cv2.imwrite('Imagen_ecualizada_localmente.tif', equalized_image)
+cv2.imwrite('Ejercicio1/Imagen_ecualizada_localmente.tif', equalized_image)
 
 # Imagen original y la ecualizada
 imshow(image)
