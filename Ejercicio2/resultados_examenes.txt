@@ -1,5 +1,5 @@
 
-Id: examen_1.png
+Id: Examen_1
 
 Nombre: OK
 Fecha: OK
@@ -17,7 +17,7 @@ Pregunta 9: MAL
 Pregunta 10: MAL
 Resultado: NO APR
 
-Id: examen_2.png
+Id: Examen_2
 
 Nombre: OK
 Fecha: OK
@@ -35,7 +35,7 @@ Pregunta 9: MAL
 Pregunta 10: OK
 Resultado: NO APR
 
-Id: examen_3.png
+Id: Examen_3
 
 Nombre: OK
 Fecha: OK
@@ -53,7 +53,7 @@ Pregunta 9: OK
 Pregunta 10: OK
 Resultado: APR
 
-Id: examen_4.png
+Id: Examen_4
 
 Nombre: OK
 Fecha: OK
@@ -71,7 +71,7 @@ Pregunta 9: MAL
 Pregunta 10: MAL
 Resultado: NO APR
 
-Id: examen_5.png
+Id: Examen_5
 
 Nombre: OK
 Fecha: OK

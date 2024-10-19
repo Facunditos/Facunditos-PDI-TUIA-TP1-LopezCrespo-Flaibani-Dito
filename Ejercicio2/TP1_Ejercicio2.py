@@ -205,7 +205,8 @@ def results_to_screen(exams: list) -> None:
 Guarda los exámenes corregidos en un archivo CSV
 '''
 def results_to_csv(path: str, exams: list) -> None:
-    output_csv = path + '/resultados_examenes.csv'
+    # output_csv = path + '/resultados_examenes.csv'
+    output_csv = os.path.join(path, 'resultados_examenes.csv')
 
     with open(output_csv, mode='w', newline='') as f:
         writer = csv.writer(f)
@@ -222,7 +223,8 @@ def results_to_csv(path: str, exams: list) -> None:
 Guarda los exámenes corregidos en un archivo TXT
 '''
 def results_to_txt(path: str, exams: list) -> None:
-    output_file = path + '/resultados_examenes.txt'
+    # output_file = path + '/resultados_examenes.txt'
+    output_file = os.path.join(path, 'resultados_examenes.txt')
 
     with open(output_file, 'w') as f:
         for exam in exams:
@@ -242,14 +244,14 @@ def results_to_txt(path: str, exams: list) -> None:
 #-------------------
 # Estructura
 #-------------------
-
-dir_path = 'Ejercicio2/Tests/'
+print("*** Corrección de exámenes ***")
+dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir ('Ejercicio2/Tests/'): ")
+# dir_path = 'Ejercicio2/Tests/'
 right_answers = ["C", "B", "A", "D", "B", "B", "A", "B", "D", "D"]
 answers = []
 exams = []
 
 # Analizar cada examen
-n = 1
 for file in os.listdir(dir_path):
     if file.endswith('.png'):  # Solo procesar archivos PNG
 
@@ -266,11 +268,10 @@ for file in os.listdir(dir_path):
                 # Name: OK/MAL
                 # Date: OK/MAL
                 # Class: OK/MAL
-            id = f"Examen_{n}"
+            id = file
             name = "OK"
             date = "OK"
             class_n = "MAL"
-            n += 1
 
             # Identificar las respuestas
             lines_answer, lines_answer_coords = identify_lines(questions)
@@ -306,6 +307,69 @@ for file in os.listdir(dir_path):
 results_to_screen(exams)
 results_to_csv(dir_path, exams)
 results_to_txt(dir_path, exams)
+
+# # Analiza un solo exámen
+# print("*** Corrección de exámenes ***")
+# dir_path = input("\nIngrese el examen a corregir ('Ejercicio2/Tests/Examen_1.png'): ")
+# directory, file = os.path.split(dir_path)
+# file_name, _ = os.path.splitext(file)
+
+# right_answers = ["C", "B", "A", "D", "B", "B", "A", "B", "D", "D"]
+# answers = []
+# exams = []
+
+# image = cv2.imread(dir_path)
+# image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# image_binary = cv2.threshold(image_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+# if image is not None:
+#     # Procesar encabezado y preguntas
+#     header, header_coords, questions, questions_coords = create_questions(image)
+
+#     # FACUNDO
+#     # ACA Trabajar el header (nombre, fecha, clase)
+#         # Name: OK/MAL
+#         # Date: OK/MAL
+#         # Class: OK/MAL
+#     id = file_name
+#     name = "OK"
+#     date = "OK"
+#     class_n = "MAL"
+
+#     # Identificar las respuestas
+#     lines_answer, lines_answer_coords = identify_lines(questions)
+#     answer = indetify_answers(lines_answer)
+#     answers.append(answer)
+
+#     # Crear un nuevo diccionario para el examen actual
+#     exam = {
+#         "id": id,
+#         "name": name,
+#         "date": date,
+#         "class": class_n,
+#         "answers": {},
+#         "passed": ""
+#     }
+
+#     # Cargar las respuestas y verificar si son correctas
+#     for idx, item in enumerate(answer):
+#         if item == right_answers[idx]:
+#             exam["answers"]["answer_" + str(idx + 1)] = {"answer": item, "state": "OK"}
+#         else:
+#             exam["answers"]["answer_" + str(idx + 1)] = {"answer": item, "state": "MAL"}
+
+#     # Comparar las respuestas correctas con las dadas para determinar si aprobó
+#     score = sum(1 for ra, a in zip(right_answers, answer) if ra == a)
+#     if score >= 6:  # 6 es el umbral de aprobación
+#         exam["passed"] = "APR"
+#     else:
+#         exam["passed"] = "NO APR"
+
+#     exams.append(exam)
+
+# results_to_screen(exams)
+# results_to_csv(directory, exams)
+# results_to_txt(directory, exams)
 
 #---------------
 # Notas
