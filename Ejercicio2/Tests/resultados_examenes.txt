@@ -1,7 +1,9 @@
 
-Nombre: Student_1
-Fecha: 
-Clase: 1
+Id: Examen_1
+
+Nombre: OK
+Fecha: OK
+Clase: MAL
 Respuestas:
 Pregunta 1: MAL
 Pregunta 2: MAL
@@ -15,9 +17,11 @@ Pregunta 9: MAL
 Pregunta 10: MAL
 Resultado: NO APR
 
-Nombre: Student_2
-Fecha: 
-Clase: 1
+Id: Examen_2
+
+Nombre: OK
+Fecha: OK
+Clase: MAL
 Respuestas:
 Pregunta 1: MAL
 Pregunta 2: MAL
@@ -31,9 +35,11 @@ Pregunta 9: MAL
 Pregunta 10: OK
 Resultado: NO APR
 
-Nombre: Student_3
-Fecha: 
-Clase: 1
+Id: Examen_3
+
+Nombre: OK
+Fecha: OK
+Clase: MAL
 Respuestas:
 Pregunta 1: OK
 Pregunta 2: OK
@@ -47,9 +53,11 @@ Pregunta 9: OK
 Pregunta 10: OK
 Resultado: APR
 
-Nombre: Student_4
-Fecha: 
-Clase: 1
+Id: Examen_4
+
+Nombre: OK
+Fecha: OK
+Clase: MAL
 Respuestas:
 Pregunta 1: MAL
 Pregunta 2: MAL
@@ -63,9 +71,11 @@ Pregunta 9: MAL
 Pregunta 10: MAL
 Resultado: NO APR
 
-Nombre: Student_5
-Fecha: 
-Clase: 1
+Id: Examen_5
+
+Nombre: OK
+Fecha: OK
+Clase: MAL
 Respuestas:
 Pregunta 1: OK
 Pregunta 2: OK

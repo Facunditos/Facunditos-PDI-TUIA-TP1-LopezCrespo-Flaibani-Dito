@@ -188,6 +188,7 @@ Muestra en pantalla el resultado detallado de cada exámen
 '''
 def results_to_screen(exams: list) -> None:
     for exam in exams:
+        print(f"\nId: {exam['id']}")
         print(f"\nNombre: {exam['name']}")
         print(f"Fecha: {exam['date']}")
         print(f"Clase: {exam['class']}")
@@ -210,11 +211,11 @@ def results_to_csv(path: str, exams: list) -> None:
         writer = csv.writer(f)
 
         # Escribir encabezados
-        writer.writerow(["Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
+        writer.writerow(["Id", "Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
 
         for exam in exams:
             for idx, (key, value) in enumerate(exam["answers"].items(), 1):
-                writer.writerow([exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
+                writer.writerow([exam["id"], exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
 
 
 '''
@@ -225,6 +226,7 @@ def results_to_txt(path: str, exams: list) -> None:
 
     with open(output_file, 'w') as f:
         for exam in exams:
+            f.write(f"\nId: {exam['id']}\n")
             f.write(f"\nNombre: {exam['name']}\n")
             f.write(f"Fecha: {exam['date']}\n")
             f.write(f"Clase: {exam['class']}\n")
@@ -261,9 +263,13 @@ for file in os.listdir(dir_path):
 
             # FACUNDO
             # ACA Trabajar el header (nombre, fecha, clase)
-            name = f"Student_{n}"
-            date = ""
-            class_n = "1"
+                # Name: OK/MAL
+                # Date: OK/MAL
+                # Class: OK/MAL
+            id = f"Examen_{n}"
+            name = "OK"
+            date = "OK"
+            class_n = "MAL"
             n += 1
 
             # Identificar las respuestas
@@ -273,6 +279,7 @@ for file in os.listdir(dir_path):
 
             # Crear un nuevo diccionario para el examen actual
             exam = {
+                "id": id,
                 "name": name,
                 "date": date,
                 "class": class_n,

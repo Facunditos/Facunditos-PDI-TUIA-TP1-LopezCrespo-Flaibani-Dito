@@ -1,51 +1,51 @@
-Nombre,Fecha,Clase,Pregunta,Respuesta,Estado,Resultado
-Student_1,,1,1,,MAL,NO APR
-Student_1,,1,2,,MAL,NO APR
-Student_1,,1,3,,MAL,NO APR
-Student_1,,1,4,,MAL,NO APR
-Student_1,,1,5,,MAL,NO APR
-Student_1,,1,6,,MAL,NO APR
-Student_1,,1,7,,MAL,NO APR
-Student_1,,1,8,,MAL,NO APR
-Student_1,,1,9,,MAL,NO APR
-Student_1,,1,10,,MAL,NO APR
-Student_2,,1,1,B,MAL,NO APR
-Student_2,,1,2,,MAL,NO APR
-Student_2,,1,3,B,MAL,NO APR
-Student_2,,1,4,D,OK,NO APR
-Student_2,,1,5,,MAL,NO APR
-Student_2,,1,6,B,OK,NO APR
-Student_2,,1,7,A,OK,NO APR
-Student_2,,1,8,,MAL,NO APR
-Student_2,,1,9,,MAL,NO APR
-Student_2,,1,10,D,OK,NO APR
-Student_3,,1,1,C,OK,APR
-Student_3,,1,2,B,OK,APR
-Student_3,,1,3,A,OK,APR
-Student_3,,1,4,D,OK,APR
-Student_3,,1,5,B,OK,APR
-Student_3,,1,6,B,OK,APR
-Student_3,,1,7,A,OK,APR
-Student_3,,1,8,B,OK,APR
-Student_3,,1,9,D,OK,APR
-Student_3,,1,10,D,OK,APR
-Student_4,,1,1,B,MAL,NO APR
-Student_4,,1,2,C,MAL,NO APR
-Student_4,,1,3,D,MAL,NO APR
-Student_4,,1,4,B,MAL,NO APR
-Student_4,,1,5,A,MAL,NO APR
-Student_4,,1,6,A,MAL,NO APR
-Student_4,,1,7,C,MAL,NO APR
-Student_4,,1,8,D,MAL,NO APR
-Student_4,,1,9,B,MAL,NO APR
-Student_4,,1,10,A,MAL,NO APR
-Student_5,,1,1,C,OK,APR
-Student_5,,1,2,B,OK,APR
-Student_5,,1,3,A,OK,APR
-Student_5,,1,4,D,OK,APR
-Student_5,,1,5,B,OK,APR
-Student_5,,1,6,B,OK,APR
-Student_5,,1,7,A,OK,APR
-Student_5,,1,8,B,OK,APR
-Student_5,,1,9,D,OK,APR
-Student_5,,1,10,D,OK,APR
+Id,Nombre,Fecha,Clase,Pregunta,Respuesta,Estado,Resultado
+Examen_1,OK,OK,MAL,1,,MAL,NO APR
+Examen_1,OK,OK,MAL,2,,MAL,NO APR
+Examen_1,OK,OK,MAL,3,,MAL,NO APR
+Examen_1,OK,OK,MAL,4,,MAL,NO APR
+Examen_1,OK,OK,MAL,5,,MAL,NO APR
+Examen_1,OK,OK,MAL,6,,MAL,NO APR
+Examen_1,OK,OK,MAL,7,,MAL,NO APR
+Examen_1,OK,OK,MAL,8,,MAL,NO APR
+Examen_1,OK,OK,MAL,9,,MAL,NO APR
+Examen_1,OK,OK,MAL,10,,MAL,NO APR
+Examen_2,OK,OK,MAL,1,B,MAL,NO APR
+Examen_2,OK,OK,MAL,2,,MAL,NO APR
+Examen_2,OK,OK,MAL,3,B,MAL,NO APR
+Examen_2,OK,OK,MAL,4,D,OK,NO APR
+Examen_2,OK,OK,MAL,5,,MAL,NO APR
+Examen_2,OK,OK,MAL,6,B,OK,NO APR
+Examen_2,OK,OK,MAL,7,A,OK,NO APR
+Examen_2,OK,OK,MAL,8,,MAL,NO APR
+Examen_2,OK,OK,MAL,9,,MAL,NO APR
+Examen_2,OK,OK,MAL,10,D,OK,NO APR
+Examen_3,OK,OK,MAL,1,C,OK,APR
+Examen_3,OK,OK,MAL,2,B,OK,APR
+Examen_3,OK,OK,MAL,3,A,OK,APR
+Examen_3,OK,OK,MAL,4,D,OK,APR
+Examen_3,OK,OK,MAL,5,B,OK,APR
+Examen_3,OK,OK,MAL,6,B,OK,APR
+Examen_3,OK,OK,MAL,7,A,OK,APR
+Examen_3,OK,OK,MAL,8,B,OK,APR
+Examen_3,OK,OK,MAL,9,D,OK,APR
+Examen_3,OK,OK,MAL,10,D,OK,APR
+Examen_4,OK,OK,MAL,1,B,MAL,NO APR
+Examen_4,OK,OK,MAL,2,C,MAL,NO APR
+Examen_4,OK,OK,MAL,3,D,MAL,NO APR
+Examen_4,OK,OK,MAL,4,B,MAL,NO APR
+Examen_4,OK,OK,MAL,5,A,MAL,NO APR
+Examen_4,OK,OK,MAL,6,A,MAL,NO APR
+Examen_4,OK,OK,MAL,7,C,MAL,NO APR
+Examen_4,OK,OK,MAL,8,D,MAL,NO APR
+Examen_4,OK,OK,MAL,9,B,MAL,NO APR
+Examen_4,OK,OK,MAL,10,A,MAL,NO APR
+Examen_5,OK,OK,MAL,1,C,OK,APR
+Examen_5,OK,OK,MAL,2,B,OK,APR
+Examen_5,OK,OK,MAL,3,A,OK,APR
+Examen_5,OK,OK,MAL,4,D,OK,APR
+Examen_5,OK,OK,MAL,5,B,OK,APR
+Examen_5,OK,OK,MAL,6,B,OK,APR
+Examen_5,OK,OK,MAL,7,A,OK,APR
+Examen_5,OK,OK,MAL,8,B,OK,APR
+Examen_5,OK,OK,MAL,9,D,OK,APR
+Examen_5,OK,OK,MAL,10,D,OK,APR
