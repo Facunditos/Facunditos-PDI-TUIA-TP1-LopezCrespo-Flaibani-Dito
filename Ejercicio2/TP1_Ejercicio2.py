@@ -1,8 +1,16 @@
+#-------------------
+# Librerías
+#-------------------
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import csv
 
+#-------------------
+# Funciones
+#-------------------
 
 def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, colorbar=True, ticks=False, vmin = 0, vmax = 255):
     if new_fig:
@@ -76,20 +84,20 @@ def create_questions(image: np.ndarray) -> tuple:
         #(x, x+w, y, y+h)
         questions_coords.append((lines_h_sorted[i][0][1]+2,lines_h_sorted[i+1][0][1]-4, lines_v_sorted[5][0][0]+2,lines_v_sorted[6][0][0]-4))
 
-    # Guarda las imágenes en Questions/
-    for idx, question in enumerate(questions):
-        cv2.imwrite("Ejercicio2/Questions/" + 'question' +  str(idx + 1) + ".png", question, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    # # Guarda las imágenes en Questions/
+    # for idx, question in enumerate(questions):
+    #     cv2.imwrite("Ejercicio2/Questions/" + 'question' +  str(idx + 1) + ".png", question, [cv2.IMWRITE_JPEG_QUALITY, 90])
+
     return header, header_coords, questions, questions_coords
 
 '''
 Dentro de cada pregunta del examen, detecta y separa las zonas de cada de las respuestas
 '''
-def identify_lines(image_binary: np.ndarra, questions_coords: list) -> tuple:
-    # questions = []
+def identify_lines(questions: list) -> tuple:
     lines_answer = []
     lines_answer_coords = []
-    for coords in questions_coords:
-        question = image_binary[coords[0]:coords[1], coords[2]:coords[3]]
+    for question in questions:
+        # question = image_binary[coords[0]:coords[1], coords[2]:coords[3]]
 
         # Realizar la operación de componentes conectadas
         connectivity = 8
@@ -104,9 +112,9 @@ def identify_lines(image_binary: np.ndarra, questions_coords: list) -> tuple:
                 lines_answer.append(line_answer)
                 lines_answer_coords.append((y-14, y+h-2, x, x+w))
 
-    # Guarda las imágenes en Answers/
-    for idx, line_answer in enumerate(lines_answer):
-        cv2.imwrite("Ejercicio2/Answers/" + 'answer' + str(idx + 1) + ".png", line_answer, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    # # Guarda las imágenes en Answers/
+    # for idx, line_answer in enumerate(lines_answer):
+    #     cv2.imwrite("Ejercicio2/Answers/" + 'answer' + str(idx + 1) + ".png", line_answer, [cv2.IMWRITE_JPEG_QUALITY, 90])
 
     return lines_answer, lines_answer_coords
 
@@ -114,7 +122,7 @@ def identify_lines(image_binary: np.ndarra, questions_coords: list) -> tuple:
 Dentro de las zonas de respuesta, identifica si la respuesta tiene un formato válido de una letra
 Devuelve todas las respuestas de un exámen
 '''
-def indetify_answers(lines_anwser: list) -> list:
+def indetify_answers(lines_answer: list) -> list:
     answers = []
     for line_answer in lines_answer:
         letter = ""
@@ -148,7 +156,6 @@ def indetify_answers(lines_anwser: list) -> list:
             aspect_ratio=0
             if first_child != -1:
                 # print(f"Contorno 0 tiene un hijo con índice {first_child}")
-
                 # Ahora contamos cuántos hijos tiene contours[0]
                 # child_count = 0
                 child = first_child
@@ -176,6 +183,59 @@ def indetify_answers(lines_anwser: list) -> list:
 
     return answers
 
+'''
+Muestra en pantalla el resultado detallado de cada exámen
+'''
+def results_to_screen(exams: list) -> None:
+    for exam in exams:
+        print(f"\nNombre: {exam['name']}")
+        print(f"Fecha: {exam['date']}")
+        print(f"Clase: {exam['class']}")
+        print("Respuestas:")
+
+        # Recorrer las respuestas y mostrar si son OK o MAL
+        for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+            print(f"Pregunta {idx}: {value['state']}")
+
+        # Mostrar si aprobó o no
+        print(f"Resultado: {exam['passed']}")
+
+'''
+Guarda los exámenes corregidos en un archivo CSV
+'''
+def results_to_csv(path: str, exams: list) -> None:
+    output_csv = path + '/resultados_examenes.csv'
+
+    with open(output_csv, mode='w', newline='') as f:
+        writer = csv.writer(f)
+
+        # Escribir encabezados
+        writer.writerow(["Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
+
+        for exam in exams:
+            for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+                writer.writerow([exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
+
+
+'''
+Guarda los exámenes corregidos en un archivo TXT
+'''
+def results_to_txt(path: str, exams: list) -> None:
+    output_file = path + '/resultados_examenes.txt'
+
+    with open(output_file, 'w') as f:
+        for exam in exams:
+            f.write(f"\nNombre: {exam['name']}\n")
+            f.write(f"Fecha: {exam['date']}\n")
+            f.write(f"Clase: {exam['class']}\n")
+            f.write("Respuestas:\n")
+
+            # Recorrer las respuestas y mostrar si son OK o MAL
+            for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+                f.write(f"Pregunta {idx}: {value['state']}\n")
+
+            # Mostrar si aprobó o no
+            f.write(f"Resultado: {exam['passed']}\n")
 
 #-------------------
 # Estructura
@@ -207,7 +267,7 @@ for file in os.listdir(dir_path):
             n += 1
 
             # Identificar las respuestas
-            lines_answer, lines_answer_coords = identify_lines(image_binary, questions_coords)
+            lines_answer, lines_answer_coords = identify_lines(questions)
             answer = indetify_answers(lines_answer)
             answers.append(answer)
 
@@ -236,51 +296,9 @@ for file in os.listdir(dir_path):
 
             exams.append(exam)
 
-# Mostrar el resultado detallado de cada exámen
-for exam in exams:
-    print(f"\nNombre: {exam['name']}")
-    print(f"Fecha: {exam['date']}")
-    print(f"Clase: {exam['class']}")
-    print("Respuestas:")
-
-    # Recorrer las respuestas y mostrar si son OK o MAL
-    for idx, (key, value) in enumerate(exam["answers"].items(), 1):
-        print(f"Pregunta {idx}: {value['state']}")
-
-    # Mostrar si aprobó o no
-    print(f"Resultado: {exam['passed']}")
-
-import csv
-
-# Guardar los exámenes corregidos en un archivo CSV
-output_csv = 'Ejercicio2/resultados_examenes.csv'
-
-with open(output_csv, mode='w', newline='') as f:
-    writer = csv.writer(f)
-
-    # Escribir encabezados
-    writer.writerow(["Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
-
-    for exam in exams:
-        for idx, (key, value) in enumerate(exam["answers"].items(), 1):
-            writer.writerow([exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
-
-# Guardar los exámenes corregidos en un archivo de texto
-output_file = 'Ejercicio2/resultados_examenes.txt'
-
-with open(output_file, 'w') as f:
-    for exam in exams:
-        f.write(f"\nNombre: {exam['name']}\n")
-        f.write(f"Fecha: {exam['date']}\n")
-        f.write(f"Clase: {exam['class']}\n")
-        f.write("Respuestas:\n")
-
-        # Recorrer las respuestas y mostrar si son OK o MAL
-        for idx, (key, value) in enumerate(exam["answers"].items(), 1):
-            f.write(f"Pregunta {idx}: {value['state']}\n")
-
-        # Mostrar si aprobó o no
-        f.write(f"Resultado: {exam['passed']}\n")
+results_to_screen(exams)
+results_to_csv(dir_path, exams)
+results_to_txt(dir_path, exams)
 
 #---------------
 # Notas
