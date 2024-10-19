@@ -36,8 +36,8 @@ def create_questions(image: np.ndarray) -> tuple:
 
     edges = cv2.Canny(image_gray, 100, 170, apertureSize=3)
 
-    image_lines = image.copy()
-    sheet = np.zeros(image.shape, dtype=np.uint8)
+    # image_lines = image.copy()
+    # sheet = np.zeros(image.shape, dtype=np.uint8)
     lines = cv2.HoughLines(edges, rho=1, theta=np.pi/180, threshold=230)#22 lineas los bordes
     lines_v = []
     lines_h = []
@@ -56,8 +56,8 @@ def create_questions(image: np.ndarray) -> tuple:
             lines_v.append(((x1,y1),(x2,y2)))
         if x1==-1000:
             lines_h.append(((x1,y1),(x2,y2)))
-        cv2.line(image_lines,(x1,y1),(x2,y2),(0,255,0),2)
-        cv2.line(sheet,(x1,y1),(x2,y2),(0,255,0),2)
+        # cv2.line(image_lines,(x1,y1),(x2,y2),(0,255,0),2)
+        # cv2.line(sheet,(x1,y1),(x2,y2),(0,255,0),2)
 
     # Ordenar las listas porque Hough no genera las líneas en orden
     lines_v_sorted = sorted(lines_v, key=lambda line: line[0][0])
@@ -244,69 +244,86 @@ def results_to_txt(path: str, exams: list) -> None:
 #-------------------
 # Estructura
 #-------------------
-print("*** Corrección de exámenes ***")
-dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir ('Ejercicio2/Tests/'): ")
-# dir_path = 'Ejercicio2/Tests/'
-right_answers = ["C", "B", "A", "D", "B", "B", "A", "B", "D", "D"]
-answers = []
-exams = []
+def main():
+    print("*** Corrección de exámenes ***")
+    dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir ('Ejercicio2/Tests/'): ")
 
-# Analizar cada examen
-for file in os.listdir(dir_path):
-    if file.endswith('.png'):  # Solo procesar archivos PNG
+        # Verificar si el directorio existe
+    if not os.path.exists(dir_path):
+        print(f"Error: El directorio '{dir_path}' no existe.")
+        return  # Terminar el programa si el directorio no se encuentra
 
-        image = cv2.imread(os.path.join(dir_path, file))
-        image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image_binary = cv2.threshold(image_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # Variable para verificar si se encontraron archivos PNG
+    found_png_files = False
 
-        if image is not None:
-            # Procesar encabezado y preguntas
-            header, header_coords, questions, questions_coords = create_questions(image)
+    right_answers = ["C", "B", "A", "D", "B", "B", "A", "B", "D", "D"]
+    answers = []
+    exams = []
 
-            # FACUNDO
-            # ACA Trabajar el header (nombre, fecha, clase)
-                # Name: OK/MAL
-                # Date: OK/MAL
-                # Class: OK/MAL
-            id = file
-            name = "OK"
-            date = "OK"
-            class_n = "MAL"
+    # Analizar cada examen
+    for file in os.listdir(dir_path):
+        if file.endswith('.png'):  # Solo procesar archivos PNG
+            found_png_files = True
 
-            # Identificar las respuestas
-            lines_answer, lines_answer_coords = identify_lines(questions)
-            answer = indetify_answers(lines_answer)
-            answers.append(answer)
+            image = cv2.imread(os.path.join(dir_path, file))
+            image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image_binary = cv2.threshold(image_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
-            # Crear un nuevo diccionario para el examen actual
-            exam = {
-                "id": id,
-                "name": name,
-                "date": date,
-                "class": class_n,
-                "answers": {},
-                "passed": ""
-            }
+            if image is not None:
+                # Procesar encabezado y preguntas
+                header, header_coords, questions, questions_coords = create_questions(image)
 
-            # Cargar las respuestas y verificar si son correctas
-            for idx, item in enumerate(answer):
-                if item == right_answers[idx]:
-                    exam["answers"]["answer_" + str(idx + 1)] = {"answer": item, "state": "OK"}
+                # FACUNDO
+                # ACA Trabajar el header (nombre, fecha, clase)
+                    # Name: OK/MAL
+                    # Date: OK/MAL
+                    # Class: OK/MAL
+                id = file
+                name = "OK"
+                date = "OK"
+                class_n = "MAL"
+
+                # Identificar las respuestas
+                lines_answer, lines_answer_coords = identify_lines(questions)
+                answer = indetify_answers(lines_answer)
+                answers.append(answer)
+
+                # Crear un nuevo diccionario para el examen actual
+                exam = {
+                    "id": id,
+                    "name": name,
+                    "date": date,
+                    "class": class_n,
+                    "answers": {},
+                    "passed": ""
+                }
+
+                # Cargar las respuestas y verificar si son correctas
+                for idx, item in enumerate(answer):
+                    if item == right_answers[idx]:
+                        exam["answers"]["answer_" + str(idx + 1)] = {"answer": item, "state": "OK"}
+                    else:
+                        exam["answers"]["answer_" + str(idx + 1)] = {"answer": item, "state": "MAL"}
+
+                # Comparar las respuestas correctas con las dadas para determinar si aprobó
+                score = sum(1 for ra, a in zip(right_answers, answer) if ra == a)
+                if score >= 6:  # 6 es el umbral de aprobación
+                    exam["passed"] = "APR"
                 else:
-                    exam["answers"]["answer_" + str(idx + 1)] = {"answer": item, "state": "MAL"}
+                    exam["passed"] = "NO APR"
 
-            # Comparar las respuestas correctas con las dadas para determinar si aprobó
-            score = sum(1 for ra, a in zip(right_answers, answer) if ra == a)
-            if score >= 6:  # 6 es el umbral de aprobación
-                exam["passed"] = "APR"
-            else:
-                exam["passed"] = "NO APR"
+                exams.append(exam)
 
-            exams.append(exam)
+    # Verificar si no se encontraron archivos PNG
+    if not found_png_files:
+        print("No se encontraron archivos PNG en el directorio especificado.")
 
-results_to_screen(exams)
-results_to_csv(dir_path, exams)
-results_to_txt(dir_path, exams)
+    results_to_screen(exams)
+    results_to_csv(dir_path, exams)
+    results_to_txt(dir_path, exams)
+
+if __name__ == "__main__":
+    main()
 
 # # Analiza un solo exámen
 # print("*** Corrección de exámenes ***")
