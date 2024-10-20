@@ -90,6 +90,24 @@ plt.subplot(224)
 plt.hist(equalized_image.flatten(), 256, [0, 256])
 plt.show()
 
+# Primer gráfico: Imagen Original
+ax1 = plt.subplot(221)
+plt.imshow(image, cmap='gray', vmin=0, vmax=255)
+ax1.set_title('Imagen Original')
+# Segundo gráfico: Histograma de la imagen original
+ax2 = plt.subplot(222)
+plt.hist(image.flatten(), 256, [0, 256])
+ax2.set_title('Histograma Imagen Original')
+# Tercer gráfico: Imagen Equalizada
+ax3 = plt.subplot(223, sharex=ax1, sharey=ax1)
+plt.imshow(equalized_image, cmap='gray', vmin=0, vmax=255)
+ax3.set_title(f'Imagen Equalizada ({window_size[0]},{window_size[1]})')
+# Cuarto gráfico: Histograma de la imagen equalizada
+ax4 = plt.subplot(224)
+plt.hist(equalized_image.flatten(), 256, [0, 256])
+ax4.set_title('Histograma Imagen Equalizada')
+plt.show()
+
 
 # Aplicar ecualización local con distintos tamaños de ventana
 window_sizes = [(3, 3), (5, 5), (9, 9), (13, 13), (19, 19), (25, 25)]
@@ -110,17 +128,20 @@ plt.tight_layout()
 plt.show()
 
 
-# Versión con cv2.equalizeHist()
-img_heq = cv2.equalizeHist(image)
-ax1=plt.subplot(221)
-plt.imshow(image,cmap='gray',vmin=0,vmax=255)
-
-plt.subplot(222)
+# Comparación con la ecualización global con cv2.equalizeHist()
+ax1 = plt.subplot(221)
+plt.imshow(image, cmap='gray', vmin=0, vmax=255)
+ax1.set_title('Imagen Original')
+# Segundo gráfico: Histograma de la imagen original
+ax2 = plt.subplot(222)
 plt.hist(image.flatten(), 256, [0, 256])
-
-plt.subplot(223,sharex=ax1,sharey=ax1)
-plt.imshow(img_heq,cmap='gray',vmin=0,vmax=255)
-
-plt.subplot(224)
+ax2.set_title('Histograma Imagen Original')
+# Tercer gráfico: Imagen Equalizada
+ax3 = plt.subplot(223, sharex=ax1, sharey=ax1)
+plt.imshow(img_heq, cmap='gray', vmin=0, vmax=255)
+ax3.set_title(f'Imagen Equalizada - Global ({window_size[0]},{window_size[1]})')
+# Cuarto gráfico: Histograma de la imagen equalizada
+ax4 = plt.subplot(224)
 plt.hist(img_heq.flatten(), 256, [0, 256])
+ax4.set_title('Histograma Imagen Equalizada - Global')
 plt.show()
