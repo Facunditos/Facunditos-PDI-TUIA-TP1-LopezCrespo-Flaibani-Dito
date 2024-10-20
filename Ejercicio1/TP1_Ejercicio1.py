@@ -129,6 +129,8 @@ plt.show()
 
 
 # Comparación con la ecualización global con cv2.equalizeHist()
+img_heq = cv2.equalizeHist(image)
+
 ax1 = plt.subplot(221)
 plt.imshow(image, cmap='gray', vmin=0, vmax=255)
 ax1.set_title('Imagen Original')
@@ -139,7 +141,7 @@ ax2.set_title('Histograma Imagen Original')
 # Tercer gráfico: Imagen Equalizada
 ax3 = plt.subplot(223, sharex=ax1, sharey=ax1)
 plt.imshow(img_heq, cmap='gray', vmin=0, vmax=255)
-ax3.set_title(f'Imagen Equalizada - Global ({window_size[0]},{window_size[1]})')
+ax3.set_title('Imagen Equalizada - Global')
 # Cuarto gráfico: Histograma de la imagen equalizada
 ax4 = plt.subplot(224)
 plt.hist(img_heq.flatten(), 256, [0, 256])
