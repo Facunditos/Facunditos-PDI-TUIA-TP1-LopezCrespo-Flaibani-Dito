@@ -54,15 +54,15 @@ imshow(image)
 np.unique(image)
 len(np.unique(image))
 
-# Todos los pixeles que no son negros en la imagen, se pasan a blanco
+# Los pixeles que no son negros en la imagen, se pasan a blanco
 prueba = image.copy()
 prueba[prueba > 0] = 255
-imshow(prueba)
+# imshow(prueba)
 
-# Todos los pixeles que con valor menor a 228 en la imagen, se pasan a negro
+# Los pixeles que con valor menor a 228 en la imagen, se pasan a negro
 prueba = image.copy()
 prueba[prueba < 228] = 0
-imshow(prueba)
+# imshow(prueba)
 
 # prueba = image.copy()
 # prueba[prueba != 10] = 255
@@ -70,16 +70,24 @@ imshow(prueba)
 # imshow(prueba)
 
 # Aplicar ecualización local del histograma con una ventana de tamaño 19x19
-window_size = (19, 19)
+window_size = (25, 25)
 equalized_image = local_histogram_equalization(image, window_size)
 cv2.imwrite('Ejercicio1/Imagen_ecualizada_localmente.tif', equalized_image)
 
-fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-axs[0].imshow(image, cmap='gray')
-axs[0].set_title('Imagen Original')
-axs[1].imshow(equalized_image, cmap='gray')
-title = f'Equalizada ({window_size[0]},{window_size[1]})'
-axs[1].set_title(title)
+plt.figure()
+ax = plt.subplot(121)
+imshow(image,new_fig=False, title="Imagen Original", colorbar=False)
+plt.subplot(122, sharex=ax, sharey=ax), imshow(equalized_image, new_fig=False, title=f'Equalizada ({window_size[0]},{window_size[1]})', colorbar=False)
+plt.show(block=False)
+
+ax1=plt.subplot(221)
+plt.imshow(image,cmap='gray',vmin=0,vmax=255)
+plt.subplot(222)
+plt.hist(image.flatten(), 256, [0, 256])
+plt.subplot(223,sharex=ax1,sharey=ax1)
+plt.imshow(equalized_image,cmap='gray',vmin=0,vmax=255)
+plt.subplot(224)
+plt.hist(equalized_image.flatten(), 256, [0, 256])
 plt.show()
 
 
@@ -99,4 +107,20 @@ for idx, window_size in enumerate(window_sizes):
     cv2.imwrite(f'Ejercicio1/Imagen_ecualizada_localmente_{window_size[0]}x{window_size[1]}.tif', equalized_image)
 
 plt.tight_layout()
+plt.show()
+
+
+# Versión con cv2.equalizeHist()
+img_heq = cv2.equalizeHist(image)
+ax1=plt.subplot(221)
+plt.imshow(image,cmap='gray',vmin=0,vmax=255)
+
+plt.subplot(222)
+plt.hist(image.flatten(), 256, [0, 256])
+
+plt.subplot(223,sharex=ax1,sharey=ax1)
+plt.imshow(img_heq,cmap='gray',vmin=0,vmax=255)
+
+plt.subplot(224)
+plt.hist(img_heq.flatten(), 256, [0, 256])
 plt.show()
