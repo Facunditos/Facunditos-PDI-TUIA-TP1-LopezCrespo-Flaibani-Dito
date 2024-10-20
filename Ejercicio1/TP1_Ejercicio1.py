@@ -48,45 +48,55 @@ def local_histogram_equalization(image, window_size):
     return output_image
 
 image = cv2.imread('Ejercicio1/Imagen_con_detalles_escondidos.tif', cv2.IMREAD_GRAYSCALE)
+imshow(image)
 
 # Pruebas
 np.unique(image)
 len(np.unique(image))
 
+# Todos los pixeles que no son negros en la imagen, se pasan a blanco
 prueba = image.copy()
 prueba[prueba > 0] = 255
 imshow(prueba)
 
+# Todos los pixeles que con valor menor a 228 en la imagen, se pasan a negro
 prueba = image.copy()
 prueba[prueba < 228] = 0
 imshow(prueba)
 
-prueba = image.copy()
-prueba[prueba != 10] = 255
-prueba[prueba == 10] = 0
-imshow(prueba)
+# prueba = image.copy()
+# prueba[prueba != 10] = 255
+# prueba[prueba == 10] = 0
+# imshow(prueba)
 
-# Aplicar ecualización local del histograma con una ventana de tamaño 15x15
-# window_size = (3, 3)
-window_size = (25, 25)
+# Aplicar ecualización local del histograma con una ventana de tamaño 19x19
+window_size = (19, 19)
 equalized_image = local_histogram_equalization(image, window_size)
-
-# Guardar el resultado
 cv2.imwrite('Ejercicio1/Imagen_ecualizada_localmente.tif', equalized_image)
 
-# Imagen original y la ecualizada
-imshow(image)
-title = '(' + str(window_size[0]) + ',' + str(window_size[1]) + ')'
-imshow(equalized_image, title = title)
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+axs[0].imshow(image, cmap='gray')
+axs[0].set_title('Imagen Original')
+axs[1].imshow(equalized_image, cmap='gray')
+title = f'Equalizada ({window_size[0]},{window_size[1]})'
+axs[1].set_title(title)
+plt.show()
 
 
-# Descripción del código:
-# Bordes replicados: Para manejar el análisis en los bordes de la imagen, se añade un borde alrededor usando cv2.copyMakeBorder con la opción cv2.BORDER_REPLICATE, que replica el valor de los píxeles en los bordes.
-# Ventana móvil: Se recorre cada píxel de la imagen y se extrae una ventana centrada en dicho píxel.
-# Histograma y ecualización: Para cada ventana, se calcula el histograma y la CDF (Función de Distribución Acumulada), y se utiliza para mapear el valor del píxel centrado.
-# Guardado del resultado: La imagen ecualizada localmente se guarda como un archivo TIFF.
-# Análisis del tamaño de ventana:
-# Tamaños de ventana más pequeños (por ejemplo, 3x3) pueden resaltar detalles muy locales, pero también pueden generar ruido.
-# Tamaños de ventana más grandes (por ejemplo, 31x31) suavizan el resultado, pero pueden perder algunos detalles finos.
-# Próximo paso:
-# Puedes ajustar el tamaño de la ventana en el parámetro window_size para observar cómo cambia la calidad de los detalles resaltados
+# Aplicar ecualización local con distintos tamaños de ventana
+window_sizes = [(3, 3), (5, 5), (9, 9), (13, 13), (19, 19), (25, 25)]
+
+fig, axs = plt.subplots(2, 3, figsize=(12, 8), sharex=True, sharey=True)
+axs = axs.ravel()  # Para aplanar la matriz de subplots y poder iterar fácilmente
+
+for idx, window_size in enumerate(window_sizes):
+    equalized_image = local_histogram_equalization(image, window_size)
+
+    axs[idx].imshow(equalized_image, cmap='gray')
+    axs[idx].set_title(f'Window Size: {window_size}')
+    axs[idx].axis('off')
+
+    cv2.imwrite(f'Ejercicio1/Imagen_ecualizada_localmente_{window_size[0]}x{window_size[1]}.tif', equalized_image)
+
+plt.tight_layout()
+plt.show()
