@@ -30,6 +30,4 @@ Desde la línea de comandos:
 * .\venv\Scripts\deactivate       # Desactiva el entorno virtual
 * python                          # Para comenzar a correr el script
 
-ADVERTENCIA: Es imprescindible respetar estos para una correcta ejecución del script. El 
-
-![alt text](image.png)
+ADVERTENCIA: Es imprescindible respetar estos pasos para una correcta ejecución del script. 
