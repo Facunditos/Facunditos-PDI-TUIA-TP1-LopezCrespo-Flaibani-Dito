@@ -1,3 +1,0 @@
-¿Por qué las coordenadas se mueven en un espacio continuo?
-Problema con el identado dentro del bucle for, no puedo agregar espacios entre líneas de códifo
-Relación entre el gamma y la transformación 
