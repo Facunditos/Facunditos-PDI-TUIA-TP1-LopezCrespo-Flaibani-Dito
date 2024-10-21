@@ -1,7 +1,11 @@
+ADVERTENCIA: Es imprescindible respetar los pasos siguietnes para una correcta ejecución del script. A su vez, debe correrse cada función de los dos scripts (TP1_Ejercicio1.py y Ejercicio2/TP1_Ejercicio2.py)
+por separado. 
+
 **TP1_Ejercicio1.py**
 
 La función "local_histogram_equalization" se utiliza dentro del código del programa
  y su funcionamiento se muestra en Visual Studio Code.
+
 
 **TP1_Ejercicio2.py**
 
@@ -26,8 +30,7 @@ Desde la línea de comandos:
 * python -m venv venv             # Crea el entorno virtual
 * .\venv\Scripts\activate         # Activa el entorno virtual
 * pip install -r requirements.txt # Instala las dependencias
-* python TP1_Ejecicio2.py         # Ejecuta el programa
-* .\venv\Scripts\deactivate       # Desactiva el entorno virtual
 * python                          # Para comenzar a correr el script
+* .\venv\Scripts\deactivate       # Desactiva el entorno virtual
 
-ADVERTENCIA: Es imprescindible respetar estos pasos para una correcta ejecución del script. 
+
