@@ -1,9 +1,9 @@
 
 Id: examen_1.png
 
-Nombre: OK
+Nombre: MAL
 Fecha: OK
-Clase: MAL
+Clase: OK
 Respuestas:
 Pregunta 1: MAL
 Pregunta 2: MAL
@@ -19,9 +19,9 @@ Resultado: NO APR
 
 Id: examen_2.png
 
-Nombre: OK
+Nombre: MAL
 Fecha: OK
-Clase: MAL
+Clase: OK
 Respuestas:
 Pregunta 1: MAL
 Pregunta 2: MAL
@@ -39,7 +39,7 @@ Id: examen_3.png
 
 Nombre: OK
 Fecha: OK
-Clase: MAL
+Clase: OK
 Respuestas:
 Pregunta 1: OK
 Pregunta 2: OK
@@ -56,8 +56,8 @@ Resultado: APR
 Id: examen_4.png
 
 Nombre: OK
-Fecha: OK
-Clase: MAL
+Fecha: MAL
+Clase: OK
 Respuestas:
 Pregunta 1: MAL
 Pregunta 2: MAL
@@ -75,7 +75,7 @@ Id: examen_5.png
 
 Nombre: OK
 Fecha: OK
-Clase: MAL
+Clase: OK
 Respuestas:
 Pregunta 1: OK
 Pregunta 2: OK

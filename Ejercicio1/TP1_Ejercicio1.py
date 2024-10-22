@@ -21,30 +21,23 @@ def local_histogram_equalization(image, window_size):
     # Agregar borde a la imagen para manejar los bordes al mover la ventana
     top, bottom, left, right = window_size[0] // 2, window_size[0] // 2, window_size[1] // 2, window_size[1] // 2
     padded_image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_REPLICATE)
-
     # Crear una imagen para almacenar el resultado
     output_image = np.zeros_like(image)
-
     # Obtener las dimensiones de la imagen
     rows, cols = image.shape
-
     # Recorrer cada píxel de la imagen
     for i in range(rows):
         for j in range(cols):
             # Extraer la ventana centrada en el píxel (i, j)
             window = padded_image[i:i+window_size[0], j:j+window_size[1]]
-
             # Calcular el histograma de la ventana
             hist, bins = np.histogram(window.flatten(), 256, [0, 256])
-
             # Calcular la función de distribución acumulada (CDF)
             cdf = hist.cumsum()
             cdf_normalized = (cdf - cdf.min()) * 255 / (cdf.max() - cdf.min())
             cdf_normalized = cdf_normalized.astype('uint8')
-
             # Mapear el valor del píxel actual usando la CDF de la ventana
             output_image[i, j] = cdf_normalized[image[i, j]]
-
     return output_image
 
 image = cv2.imread('Ejercicio1/Imagen_con_detalles_escondidos.tif', cv2.IMREAD_GRAYSCALE)
@@ -114,23 +107,18 @@ window_sizes = [(3, 3), (5, 5), (9, 9), (13, 13), (19, 19), (25, 25)]
 
 fig, axs = plt.subplots(2, 3, figsize=(12, 8), sharex=True, sharey=True)
 axs = axs.ravel()  # Para aplanar la matriz de subplots y poder iterar fácilmente
-
 for idx, window_size in enumerate(window_sizes):
     equalized_image = local_histogram_equalization(image, window_size)
-
     axs[idx].imshow(equalized_image, cmap='gray')
     axs[idx].set_title(f'Window Size: {window_size}')
     axs[idx].axis('off')
-
     cv2.imwrite(f'Ejercicio1/Imagen_ecualizada_localmente_{window_size[0]}x{window_size[1]}.tif', equalized_image)
-
 plt.tight_layout()
 plt.show()
 
 
 # Comparación con la ecualización global con cv2.equalizeHist()
 img_heq = cv2.equalizeHist(image)
-
 ax1 = plt.subplot(221)
 plt.imshow(image, cmap='gray', vmin=0, vmax=255)
 ax1.set_title('Imagen Original')
