@@ -34,16 +34,12 @@ def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, color
 Detecta, separa y analiza los campos del encabezado del examen
 '''
 def analyze_header(img_enc: np.array) -> tuple:
-    header_name = ''
-    header_date = ''
-    header_class = ''
     img_enc_rows = np.sum(img_enc,1)
     # np.unique(img_enc_rows)
     max_q_pix = np.max(img_enc_rows)
     # Identificamos en cuál índice horizontal se encuentra las líneas de los campos
     idx_lin_campos_enc_h = np.argwhere(img_enc_rows==max_q_pix)[0,0]
     lin_campos_enc_h = img_enc[idx_lin_campos_enc_h,:]
-
     # Ahora pasamos a identificar los respectivos índices verticales 
     y = np.diff(lin_campos_enc_h)
     idxs_lin_campos_enc_v = np.argwhere(y)
@@ -85,7 +81,6 @@ def analyze_header(img_enc: np.array) -> tuple:
         datos_campo['num_caracteres'] = num_caracteres
         datos_campo['num_palabras'] = num_palabras
         campos_enc.append(datos_campo)
-
     for campo_enc in campos_enc:
         nombre_campo = campo_enc['nombre']
         num_car = campo_enc['num_caracteres']
@@ -95,20 +90,16 @@ def analyze_header(img_enc: np.array) -> tuple:
             # Se corroborra si el alumno completó correctamente el nombre_campo
             respuesta = 'OK' if (num_car <= 25 and num_palabras >= 2) else 'MAL'
             campo_enc['respuesta'] = respuesta
-            header_name =respuesta
         elif nombre_campo == 'Date':
             # Se corroborra si el alumno completó correctamente la fecha
             respuesta = 'OK' if (num_car == 8 and num_palabras == 2) else 'MAL'
             campo_enc['respuesta'] = respuesta
-            header_date = respuesta
         elif nombre_campo == 'Class':
             # Se corroborra si el alumno completó correctamente la clase
             respuesta = 'OK' if (num_car == 1) else 'MAL'
             campo_enc['respuesta'] = respuesta
-            header_class = respuesta
         # print(f"{nombre_campo}:\t{respuesta}")  
         # imshow(img, title=f"{nombre_campo}:{respuesta}")
-    # return header_name, header_date, header_class
     return campos_enc[0]['img'],campos_enc[0]['respuesta'],campos_enc[1]['respuesta'],campos_enc[2]['respuesta']
 
 '''
