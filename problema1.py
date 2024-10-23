@@ -45,7 +45,6 @@ def ecualizar_localmente(img:np.array,tamaño_ventana)->np.array:
 img = cv2.imread('.\Ejercicio1\Imagen_con_detalles_escondidos.tif',cv2.IMREAD_GRAYSCALE)   
 tamaño_ventana_chico = (3,3)
 img_equ_ventana_chica = ecualizar_localmente(img,tamaño_ventana_chico)
-
 tamaño_ventana_grande = (25,25)
 img_equ_ventana_grande = ecualizar_localmente(img,tamaño_ventana_grande)
 
