@@ -43,6 +43,12 @@ def ecualizar_localmente(img:np.array,tamaño_ventana)->np.array:
 
 
 img = cv2.imread('.\Ejercicio1\Imagen_con_detalles_escondidos.tif',cv2.IMREAD_GRAYSCALE)   
+x = np.random.rand(*img.shape)
+x.shape
+img[x<0.2] = 1
+img
+img[img==227] = 20
+idx = np.argwhere()
 tamaño_ventana_chico = (3,3)
 img_equ_ventana_chica = ecualizar_localmente(img,tamaño_ventana_chico)
 tamaño_ventana_grande = (25,25)
