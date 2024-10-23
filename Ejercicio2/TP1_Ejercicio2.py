@@ -40,12 +40,12 @@ def analyze_header(img_enc: np.array) -> tuple:
     # Identificamos en cuál índice horizontal se encuentra las líneas de los campos
     idx_lin_campos_enc_h = np.argwhere(img_enc_rows==max_q_pix)[0,0]
     lin_campos_enc_h = img_enc[idx_lin_campos_enc_h,:]
-    # Ahora pasamos a identificar los respectivos índices verticales 
+    # Ahora pasamos a identificar los respectivos índices verticales
     y = np.diff(lin_campos_enc_h)
     idxs_lin_campos_enc_v = np.argwhere(y)
     ii = np.arange(0,len(idxs_lin_campos_enc_v),2)    # 0 2 4 ... X --> X es el último nro par antes de len(renglones_indxs)
     idxs_lin_campos_enc_v[ii]+=1
-    idxs_lin_campos_enc_v = np.reshape(idxs_lin_campos_enc_v, (-1,2)) 
+    idxs_lin_campos_enc_v = np.reshape(idxs_lin_campos_enc_v, (-1,2))
     # Defino la estructura de datos que va a contener toda la info relativa al campo de los encabezados
     campos_enc = []
     nombes_campos_enc = ['Name','Date','Class']
@@ -92,13 +92,13 @@ def analyze_header(img_enc: np.array) -> tuple:
             campo_enc['respuesta'] = respuesta
         elif nombre_campo == 'Date':
             # Se corroborra si el alumno completó correctamente la fecha
-            respuesta = 'OK' if (num_car == 8 and num_palabras == 2) else 'MAL'
+            respuesta = 'OK' if (num_car == 8 and num_palabras == 1) else 'MAL'
             campo_enc['respuesta'] = respuesta
         elif nombre_campo == 'Class':
             # Se corroborra si el alumno completó correctamente la clase
             respuesta = 'OK' if (num_car == 1) else 'MAL'
             campo_enc['respuesta'] = respuesta
-        # print(f"{nombre_campo}:\t{respuesta}")  
+        # print(f"{nombre_campo}:\t{respuesta}")
         # imshow(img, title=f"{nombre_campo}:{respuesta}")
     return campos_enc[0]['img'],campos_enc[0]['respuesta'],campos_enc[1]['respuesta'],campos_enc[2]['respuesta']
 
@@ -106,9 +106,18 @@ def analyze_header(img_enc: np.array) -> tuple:
 Detecta y separa las zonas de cada pregunta en la imagen
 '''
 def create_questions(image: np.ndarray) -> tuple:
-    # image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    th = image.max() * 0.9
+    img_th = image < th
+    img_rows = np.sum(img_th,1)
+    q_pix_unique = np.unique(img_rows)
+    q_pix_unique
+    th_row = 400
+    img_rows_th = img_rows > th_row
+    img_rows_th
+    idx_1_lin_h = np.argwhere(img_rows_th)[0,0]
+    image_binary_header = img_th[:(idx_1_lin_h+1),:]
+    # image_binary_header = cv2.threshold(image, 0, 230, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     image_binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    image_binary1 = cv2.threshold(image, 0, 230, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     edges = cv2.Canny(image, 100, 170, apertureSize=3)
     # image_lines = image.copy()
     # sheet = np.zeros(image.shape, dtype=np.uint8)
@@ -135,8 +144,7 @@ def create_questions(image: np.ndarray) -> tuple:
     # Ordenar las listas porque Hough no genera las líneas en orden
     lines_v_sorted = sorted(lines_v, key=lambda line: line[0][0])
     lines_h_sorted = sorted(lines_h, key=lambda line: line[0][1])
-    # FACUNDO si no querés tener la lína abajo, sacale los 2 "+ 5". Te dejé la línea para que detectes las zonas de name, date y class
-    header = image_binary1[0:lines_h_sorted[0][0][1] + 3, 0:image.shape[0]]
+    header = image_binary_header.copy() #image_binary1[0:lines_h_sorted[0][0][1] + 3, 0:image.shape[0]]
     header_coords = (0,lines_h_sorted[0][0][1] + 3, 0,image.shape[0])
     # imshow(header)
     questions = []
@@ -165,7 +173,6 @@ def identify_lines(questions: list) -> tuple:
     lines_answer = []
     lines_answer_coords = []
     for question in questions:
-        # question = image_binary[coords[0]:coords[1], coords[2]:coords[3]]
         # Realizar la operación de componentes conectadas
         connectivity = 8
         # Si la imagen no está invertida (fondo negro) no funciona: 255-questions[j]
@@ -291,16 +298,19 @@ def results_to_txt(path: str, exams: list) -> None:
 '''
 Muestra una imagen que contiene una subimagen por examen evaluado para mostrar si el alumno aprobó 
 '''
-def results_to_img(exams:list) -> None:
+# def results_to_img(path: str, exams:list) -> None:
+def results_to_img(path:str, exams:list) -> None:
     plt.figure()
     N_rows = (len(exams) //2) +1
     for i,examen in enumerate(exams):
         if (i==0):
             ax = plt.subplot(N_rows,2,i+1)
-            imshow(exams[i]['img_name'],new_fig=False, title=exams[i]['passed'],colorbar=False)
-        plt.subplot(N_rows,2,i+1, sharex=ax, sharey=ax), imshow(exams[i]['img_name'], new_fig=False, title=exams[i]['passed'],colorbar=False)
+            imshow(exams[i]['img_name'],new_fig=False, title=exams[i]['passed'],colorbar=False, vmax=1)
+        plt.subplot(N_rows,2,i+1, sharex=ax, sharey=ax), imshow(exams[i]['img_name'], new_fig=False, title=exams[i]['passed'],colorbar=False, vmax=1)
     plt.suptitle("Resultado de la evaluación")
     plt.show(block=False)
+    plt.savefig(path + "/Informe.jpg", format='jpg', dpi=300, bbox_inches='tight')
+    # plt.close()
 
 #-------------------
 # Programa principal
@@ -321,14 +331,15 @@ def main():
     for file in os.listdir(dir_path):
         if file.endswith('.png'):  # Solo procesar archivos PNG
             image = cv2.imread(os.path.join(dir_path, file),cv2.IMREAD_GRAYSCALE)
-            image_binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+            # img = cv2.imread('Ejercicio2/Tests/examen_5.png',cv2.IMREAD_GRAYSCALE)
+            # image_binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
             if image is not None:
                 found_png_files = True
                 id = file
                 # Procesar encabezado y preguntas
                 header, _, questions, _ = create_questions(image)
-                header_bool = header == 0
-                img_name, name, date, class_n = analyze_header(header_bool)
+                # header_bool = header == 0
+                img_name, name, date, class_n = analyze_header(header)
                 # Identificar las respuestas
                 lines_answer, _ = identify_lines(questions)
                 answer = indetify_answers(lines_answer)
@@ -362,7 +373,7 @@ def main():
     results_to_screen(exams)
     results_to_csv(dir_path, exams)
     results_to_txt(dir_path, exams)
-    results_to_img(exams)
+    results_to_img(dir_path, exams)
     input("Presione Enter para continuar...")
 
 if __name__ == "__main__":
