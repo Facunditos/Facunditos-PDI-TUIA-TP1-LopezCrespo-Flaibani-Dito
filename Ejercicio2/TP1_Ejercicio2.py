@@ -101,7 +101,7 @@ def analyze_header(img_enc: np.array) -> tuple:
 '''
 Detecta y separa las zonas de cada pregunta en la imagen
 '''
-def create_questions(image: np.ndarray) -> tuple:
+def identify_questions(image: np.ndarray) -> tuple:
     th = image.max() * 0.9
     img_th = image < th
     img_rows = np.sum(img_th,1)
@@ -163,7 +163,7 @@ def create_questions(image: np.ndarray) -> tuple:
     return header, header_coords, questions, questions_coords
 
 '''
-Dentro de cada pregunta del examen, detecta y separa las zonas de cada de las respuestas
+Dentro de cada pregunta del examen, detecta y separa las zonas de cada una de las respuestas
 '''
 def identify_lines(questions: list) -> tuple:
     lines_answer = []
@@ -171,7 +171,7 @@ def identify_lines(questions: list) -> tuple:
     for question in questions:
         # Se identifican las componentes conectadas
         connectivity = 8
-        # Si la imagen no está invertida (fondo negro) no funciona: 255-questions[j]
+        # Si la imagen no está invertida (fondo negro) no funciona: 255-question
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(255-question, connectivity, cv2.CV_32S)
         # Se itera sobre las estadísticas para identificar los componentes con área en el rango deseado
         for i, st in enumerate(stats):
@@ -189,7 +189,7 @@ def identify_lines(questions: list) -> tuple:
 Dentro de las zonas de respuesta, identifica si la respuesta tiene un formato válido de una letra
 Devuelve todas las respuestas de un exámen
 '''
-def indetify_answers(lines_answer: list) -> list:
+def identify_answers(lines_answer: list) -> list:
     answers = []
     for line_answer in lines_answer:
         letter = ""
@@ -198,7 +198,7 @@ def indetify_answers(lines_answer: list) -> list:
         # Componentes conectados
         #--------------------------------
         connectivity = 8
-        # Si la imagen no está invertida (fondo negro) no funciona: 255-questions[j]
+        # Si la imagen no está invertida (fondo negro) no funciona: 255-line_answer
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(255-line_answer, connectivity, cv2.CV_32S)
         if num_labels == 2:
             #--------------------------------
@@ -209,7 +209,7 @@ def indetify_answers(lines_answer: list) -> list:
             # A contorno con 1 hijo / relación area_hijo/area_padre < 0.65
             # D contorno con 1 hijo / relación area_hijo/area_padre > 0.65
             #--------------------------------
-            # Si la imagen no está invertida (fondo negro) no funciona: 255-lines_answer[k]
+            # Si la imagen no está invertida (fondo negro) no funciona: 255-line_answer
             contours, hierarchy = cv2.findContours(255-line_answer, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
             next, previuos, first_child, father = hierarchy[0][0]
             # Si first_child es -1, no tiene hijos; si es distinto de -1, tiene un hijo.
@@ -220,7 +220,6 @@ def indetify_answers(lines_answer: list) -> list:
             if first_child != -1:
                 # print(f"Contorno 0 tiene un hijo con índice {first_child}")
                 # Se cuentan los hijos que tiene contours[0]
-                # child_count = 0
                 child = first_child
                 while child != -1:
                     child_count += 1
@@ -229,11 +228,11 @@ def indetify_answers(lines_answer: list) -> list:
                 if child_count==2: letter="B"
                 elif child_count==1:
                     # Se diferencia entre "A" y "D"
-                    x, y, w, h = cv2.boundingRect(contours[first_child])  # Obtener el rectángulo delimitador del contorno hijo
-                    aspect_ratio = w / h  # Relación de aspecto
-                    child_area = cv2.contourArea(contours[first_child])  # Área del contorno hijo
-                    father_area = cv2.contourArea(contours[0])  # Área del contorno padre
-                    if child_area / father_area < 0.65: # and aspect_ratio < 1:
+                    x, y, w, h = cv2.boundingRect(contours[first_child])    # Obtener el rectángulo delimitador del contorno hijo
+                    aspect_ratio = w / h                                    # Relación de aspecto
+                    child_area = cv2.contourArea(contours[first_child])     # Área del contorno hijo
+                    father_area = cv2.contourArea(contours[0])              # Área del contorno padre
+                    if child_area / father_area < 0.65:                     # and aspect_ratio < 1:
                         letter = "A"  # El hueco es más pequeño y centrado
                     else:
                         letter = "D"  # El hueco es más grande y alargado
@@ -306,7 +305,7 @@ def results_to_img(path:str, exams:list) -> None:
 #-------------------
 def main():
     print("*** Corrección de exámenes ***")
-    dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir ('Ejercicio2/Tests/'): ")
+    dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir ('Tests'): ")
     # Verificar si el directorio existe
     if not os.path.exists(dir_path):
         print(f"Error: El directorio '{dir_path}' no existe.")
@@ -314,7 +313,6 @@ def main():
     # Variable para verificar si se encontraron archivos PNG
     found_png_files = False
     right_answers = ["C", "B", "A", "D", "B", "B", "A", "B", "D", "D"]
-    answers = []
     exams = []
     # Analizar cada examen
     for file in os.listdir(dir_path):
@@ -324,13 +322,12 @@ def main():
                 found_png_files = True
                 id = file
                 # Procesar encabezado y preguntas
-                header, _, questions, _ = create_questions(image)
+                header, _, questions, _ = identify_questions(image)
                 # header_bool = header == 0
                 img_name, name, date, class_n = analyze_header(header)
                 # Identificar las respuestas
                 lines_answer, _ = identify_lines(questions)
-                answer = indetify_answers(lines_answer)
-                answers.append(answer)
+                answer = identify_answers(lines_answer)
                 # Crear un nuevo diccionario para el examen actual
                 exam = {
                     "id": id,
