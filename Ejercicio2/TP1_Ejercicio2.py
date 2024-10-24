@@ -9,7 +9,15 @@ import csv
 #-------------------
 # Funciones
 #-------------------
+<<<<<<< HEAD
 def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, colorbar=True, ticks=False):
+=======
+
+'''
+Muestra imágenes por pantalla
+'''
+def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, colorbar=True, ticks=False, vmin = 0, vmax = 255):
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
     if new_fig:
         plt.figure()
     if color_img:
@@ -25,12 +33,89 @@ def imshow(img, new_fig=True, title=None, color_img=False, blocking=False, color
         plt.show(block=blocking)
 
 '''
+Detecta, separa y analiza los campos del encabezado del examen
+'''
+def analyze_header(img_enc: np.array) -> tuple:
+    img_enc_rows = np.sum(img_enc,1)
+    max_q_pix = np.max(img_enc_rows)
+    # Se identifica en cuál índice horizontal se encuentra las líneas de los campos
+    idx_lin_campos_enc_h = np.argwhere(img_enc_rows==max_q_pix)[0,0]
+    lin_campos_enc_h = img_enc[idx_lin_campos_enc_h,:]
+    # Se identifican los respectivos índices verticales
+    y = np.diff(lin_campos_enc_h)
+    idxs_lin_campos_enc_v = np.argwhere(y)
+    ii = np.arange(0,len(idxs_lin_campos_enc_v),2)    # 0 2 4 ... X --> X es el último nro par antes de len(renglones_indxs)
+    idxs_lin_campos_enc_v[ii]+=1
+    idxs_lin_campos_enc_v = np.reshape(idxs_lin_campos_enc_v, (-1,2))
+    # Se define la estructura de datos que va a contener toda la info relativa al campo de los encabezados
+    campos_enc = []
+    nombes_campos_enc = ['Name','Date','Class']
+    for i,nombre_campo in enumerate(nombes_campos_enc):
+        # Se crea la estructura de datos a utlizar para guardar la información relevante de cada campo
+        datos_campo = {}
+        datos_campo['nombre'] = nombre_campo
+        idx_ini_lin_campos_enc_v = idxs_lin_campos_enc_v[i,0] #acaaa
+        idx_fin_lin_campos_enc_v = idxs_lin_campos_enc_v[i,1]
+        # Cropping del campo del encabezado
+        img_campo = img_enc[:idx_lin_campos_enc_h,idx_ini_lin_campos_enc_v:idx_fin_lin_campos_enc_v]
+        # img_Campo el tipo de dato para poder utilizar la función de cv2 que no acepta datos booleanos
+        img_campo = img_campo.astype('uint8')
+        datos_campo['img'] = img_campo
+        connectivity = 8
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(img_campo, connectivity, cv2.CV_32S)
+        # Se excluye al elemento encabezado para quedarnos únicamente con los caracteres
+        estadisticas_caracteres = stats[1:,:]
+        num_caracteres = len(estadisticas_caracteres)
+        num_palabras = 1
+        for i,stat_caracter in enumerate(estadisticas_caracteres):
+            # El cálculo de la distancia lo empezamos a computar con el segundo caracter
+            if (i==0):
+                continue
+            stat_anterior_caracter = estadisticas_caracteres[(i-1),:]
+            x_final_anterior_caracter = stat_anterior_caracter[0] + stat_anterior_caracter[2]
+            x_inicial_actual_caracter = stat_caracter[0]
+            delta_h_entre_caracteres = x_inicial_actual_caracter - x_final_anterior_caracter
+            # Si la distancia horizontal es mayor a tres píxeles el alumno escribió una nueva palabra
+            if (delta_h_entre_caracteres>4):
+                num_palabras +=1
+        datos_campo['num_caracteres'] = num_caracteres
+        datos_campo['num_palabras'] = num_palabras
+        campos_enc.append(datos_campo)
+    for campo_enc in campos_enc:
+        nombre_campo = campo_enc['nombre']
+        num_car = campo_enc['num_caracteres']
+        num_palabras = campo_enc['num_palabras']
+        img = campo_enc['img']
+        if nombre_campo == 'Name':
+            # Se corrobora si el alumno completó correctamente el nombre_campo
+            respuesta = 'OK' if (num_car <= 25 and num_palabras >= 2) else 'MAL'
+            campo_enc['respuesta'] = respuesta
+        elif nombre_campo == 'Date':
+            # Se corrobora si el alumno completó correctamente la fecha
+            respuesta = 'OK' if (num_car == 8 and num_palabras == 1) else 'MAL'
+            campo_enc['respuesta'] = respuesta
+        elif nombre_campo == 'Class':
+            # Se corrobora si el alumno completó correctamente la clase
+            respuesta = 'OK' if (num_car == 1) else 'MAL'
+            campo_enc['respuesta'] = respuesta
+    return campos_enc[0]['img'],campos_enc[0]['respuesta'],campos_enc[1]['respuesta'],campos_enc[2]['respuesta']
+
+'''
 Detecta y separa las zonas de cada pregunta en la imagen
 '''
+<<<<<<< HEAD
 def create_questions(image: np.ndarray) -> tuple:
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image_binary = cv2.threshold(image_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     edges = cv2.Canny(image_gray, 100, 170, apertureSize=3)
+=======
+def identify_questions(image: np.ndarray) -> tuple:
+    th = image.max() * 0.9
+    # image_binary_header = cv2.threshold(image, th, 255, cv2.THRESH_BINARY)[1]
+    image_binary_header = (image > th).astype(np.uint8) * 255
+    image_binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    edges = cv2.Canny(image, 100, 170, apertureSize=3)
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
     # image_lines = image.copy()
     # sheet = np.zeros(image.shape, dtype=np.uint8)
     lines = cv2.HoughLines(edges, rho=1, theta=np.pi/180, threshold=230)#22 lineas los bordes
@@ -56,10 +141,15 @@ def create_questions(image: np.ndarray) -> tuple:
     # Ordenar las listas porque Hough no genera las líneas en orden
     lines_v_sorted = sorted(lines_v, key=lambda line: line[0][0])
     lines_h_sorted = sorted(lines_h, key=lambda line: line[0][1])
+<<<<<<< HEAD
     # FACUNDO si no querés tener la lína abajo, sacale los 2 "+ 5". Te dejé la línea para que detectes las zonas de name, date y class
     header = image_binary[0:lines_h_sorted[0][0][1] + 5, 0:image.shape[0]]
     header_coords = (0,lines_h_sorted[0][0][1] + 5, 0,image.shape[0])
     # imshow(header)
+=======
+    header = 255 - image_binary_header[0:lines_h_sorted[0][0][1] + 5, 0:image.shape[0]]
+    header_coords = (0,lines_h_sorted[0][0][1] + 5, 0,image.shape[0])
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
     questions = []
     questions_coords = []
     # Extraer las preguntas y agregarlas a la lista (columna izquierda)
@@ -80,6 +170,7 @@ def create_questions(image: np.ndarray) -> tuple:
     return header, header_coords, questions, questions_coords
 
 '''
+<<<<<<< HEAD
 Detecta, separa y analiza los campos del encabezado del examen
 '''
 def analyze_header(file: str) -> tuple:
@@ -168,17 +259,28 @@ def analyze_header(file: str) -> tuple:
 
 '''
 Dentro de cada pregunta del examen, detecta y separa las zonas de cada de las respuestas
+=======
+Dentro de cada pregunta del examen, detecta y separa las zonas de cada una de las respuestas
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
 '''
 def identify_lines(questions: list) -> tuple:
     lines_answer = []
     lines_answer_coords = []
     for question in questions:
+<<<<<<< HEAD
         # question = image_binary[coords[0]:coords[1], coords[2]:coords[3]]
         # Realizar la operación de componentes conectadas
+=======
+        # Se identifican las componentes conectadas
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
         connectivity = 8
-        # Si la imagen no está invertida (fondo negro) no funciona: 255-questions[j]
+        # Si la imagen no está invertida (fondo negro) no funciona: 255-question
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(255-question, connectivity, cv2.CV_32S)
+<<<<<<< HEAD
         # Iterar sobre las estadísticas y dibujar los rectángulos para los componentes con área en el rango deseado
+=======
+        # Se itera sobre las estadísticas para identificar los componentes con área en el rango deseado
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
         for i, st in enumerate(stats):
             x, y, w, h, area = st
             if w > 50 and h < 3:
@@ -194,21 +296,22 @@ def identify_lines(questions: list) -> tuple:
 Dentro de las zonas de respuesta, identifica si la respuesta tiene un formato válido de una letra
 Devuelve todas las respuestas de un exámen
 '''
-def indetify_answers(lines_answer: list) -> list:
+def identify_answers(lines_answer: list) -> list:
     answers = []
     for line_answer in lines_answer:
         letter = ""
         #--------------------------------
-        # Verificar que haya solo una letra: num_labels == 2 (contorno de la imagen + letra)
+        # Verificar que haya solo una letra: num_labels == 2 (fondo de la imagen + letra)
         # Componentes conectados
         #--------------------------------
         connectivity = 8
-        # Si la imagen no está invertida (fondo negro) no funciona: 255-questions[j]
+        # Si la imagen no está invertida (fondo negro) no funciona: 255-line_answer
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(255-line_answer, connectivity, cv2.CV_32S)
         if num_labels == 2:
             #--------------------------------
             # Segmentar las letras
             # Obtención de contornos
+<<<<<<< HEAD
             # answers[0] C contorno sin hijos
             # answers[1] B contorno con 2 hijos
             # answers[2] A contorno con 1 hijo / relación area_hijo/area_padre < 0.65
@@ -216,6 +319,14 @@ def indetify_answers(lines_answer: list) -> list:
             #--------------------------------
             # Si la imagen no está invertida (fondo negro) no funciona: 255-lines_answer[k]
             # contornos, hierarchy = cv2.findContours(255-lines_answer[k], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+=======
+            # C contorno sin hijos
+            # B contorno con 2 hijos
+            # A contorno con 1 hijo / relación area_hijo/area_padre < 0.65
+            # D contorno con 1 hijo / relación area_hijo/area_padre > 0.65
+            #--------------------------------
+            # Si la imagen no está invertida (fondo negro) no funciona: 255-line_answer
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
             contours, hierarchy = cv2.findContours(255-line_answer, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
             next, previuos, first_child, father = hierarchy[0][0]
             # Si first_child es -1, no tiene hijos; si es distinto de -1, tiene un hijo.
@@ -225,8 +336,7 @@ def indetify_answers(lines_answer: list) -> list:
             aspect_ratio=0
             if first_child != -1:
                 # print(f"Contorno 0 tiene un hijo con índice {first_child}")
-                # Ahora contamos cuántos hijos tiene contours[0]
-                # child_count = 0
+                # Se cuentan los hijos que tiene contours[0]
                 child = first_child
                 while child != -1:
                     child_count += 1
@@ -234,12 +344,21 @@ def indetify_answers(lines_answer: list) -> list:
                     child = next_child
                 if child_count==2: letter="B"
                 elif child_count==1:
+<<<<<<< HEAD
                     # Diferenciar entre "A" y "D"
                     x, y, w, h = cv2.boundingRect(contours[first_child])  # Obtener el rectángulo delimitador del contorno hijo
                     aspect_ratio = w / h  # Relación de aspecto
                     child_area = cv2.contourArea(contours[first_child])  # Área del contorno hijo
                     father_area = cv2.contourArea(contours[0])  # Área del contorno padre
                     if child_area / father_area < 0.65: # and aspect_ratio < 1:
+=======
+                    # Se diferencia entre "A" y "D"
+                    x, y, w, h = cv2.boundingRect(contours[first_child])    # Obtener el rectángulo delimitador del contorno hijo
+                    aspect_ratio = w / h                                    # Relación de aspecto
+                    child_area = cv2.contourArea(contours[first_child])     # Área del contorno hijo
+                    father_area = cv2.contourArea(contours[0])              # Área del contorno padre
+                    if child_area / father_area < 0.65:                     # and aspect_ratio < 1:
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
                         letter = "A"  # El hueco es más pequeño y centrado
                     else:
                         letter = "D"  # El hueco es más grande y alargado
@@ -257,31 +376,42 @@ def results_to_screen(exams: list) -> None:
         print(f"Fecha: {exam['date']}")
         print(f"Clase: {exam['class']}")
         print("Respuestas:")
+<<<<<<< HEAD
         # Recorrer las respuestas y mostrar si son OK o MAL
         for idx, (key, value) in enumerate(exam["answers"].items(), 1):
             print(f"Pregunta {idx}: {value['state']}")
         # Mostrar si aprobó o no
+=======
+        # Se recorren las respuestas y se muestra si son OK o MAL
+        for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+            print(f"Pregunta {idx}: {value['state']}")
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
         print(f"Resultado: {exam['passed']}")
 
 '''
 Guarda los exámenes corregidos en un archivo CSV
 '''
 def results_to_csv(path: str, exams: list) -> None:
-    # output_csv = path + '/resultados_examenes.csv'
     output_csv = os.path.join(path, 'resultados_examenes.csv')
     with open(output_csv, mode='w', newline='') as f:
         writer = csv.writer(f)
+<<<<<<< HEAD
         # Escribir encabezados
         writer.writerow(["Id", "Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
         for exam in exams:
             for idx, (key, value) in enumerate(exam["answers"].items(), 1):
                 writer.writerow([exam["id"], exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
+=======
+        writer.writerow(["Id", "Nombre", "Fecha", "Clase", "Pregunta", "Respuesta", "Estado", "Resultado"])
+        for exam in exams:
+            for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+                if key != 'img_name': writer.writerow([exam["id"], exam["name"], exam["date"], exam["class"], idx, value["answer"], value["state"], exam["passed"]])
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
 
 '''
 Guarda los exámenes corregidos en un archivo TXT
 '''
 def results_to_txt(path: str, exams: list) -> None:
-    # output_file = path + '/resultados_examenes.txt'
     output_file = os.path.join(path, 'resultados_examenes.txt')
     with open(output_file, 'w') as f:
         for exam in exams:
@@ -290,45 +420,69 @@ def results_to_txt(path: str, exams: list) -> None:
             f.write(f"Fecha: {exam['date']}\n")
             f.write(f"Clase: {exam['class']}\n")
             f.write("Respuestas:\n")
+<<<<<<< HEAD
             # Recorrer las respuestas y mostrar si son OK o MAL
             for idx, (key, value) in enumerate(exam["answers"].items(), 1):
                 f.write(f"Pregunta {idx}: {value['state']}\n")
             # Mostrar si aprobó o no
+=======
+            # Se recorren las respuestas y se muestra si son OK o MAL
+            for idx, (key, value) in enumerate(exam["answers"].items(), 1):
+                f.write(f"Pregunta {idx}: {value['state']}\n")
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
             f.write(f"Resultado: {exam['passed']}\n")
 
 '''
 Muestra una imagen que contiene una subimagen por examen evaluado para mostrar si el alumno aprobó 
 '''
+<<<<<<< HEAD
 def results_to_img(exams:list) -> None:
+=======
+def results_to_img(path:str, exams:list) -> None:
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
     plt.figure()
     N_rows = (len(exams) //2) +1
     for i,examen in enumerate(exams):
         if (i==0):
             ax = plt.subplot(N_rows,2,i+1)
+<<<<<<< HEAD
             imshow(exams[i]['img_name'],new_fig=False, title=exams[i]['passed'],colorbar=False)
         plt.subplot(N_rows,2,i+1, sharex=ax, sharey=ax), imshow(exams[i]['img_name'], new_fig=False, title=exams[i]['passed'],colorbar=False)
     plt.suptitle("Resultado de la evaluación")
     plt.show(block=False)
 
+=======
+            imshow(exams[i]['img_name'],new_fig=False, title=exams[i]['passed'],colorbar=False, vmax=1)
+        plt.subplot(N_rows,2,i+1, sharex=ax, sharey=ax), imshow(exams[i]['img_name'], new_fig=False, title=exams[i]['passed'],colorbar=False, vmax=1)
+    plt.suptitle("Resultado de la evaluación")
+    plt.show(block=False)
+    plt.savefig(path + "/Informe.jpg", format='jpg', dpi=300, bbox_inches='tight')
+    # plt.close()
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
 
 #-------------------
-# Estructura
+# Programa principal
 #-------------------
 def main():
     print("*** Corrección de exámenes ***")
+<<<<<<< HEAD
     dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir (ruta absoluta): ")
         # Verificar si el directorio existe
+=======
+    dir_path = input("\nIngrese la carpeta que contiene los exámenes a corregir ('Tests'): ")
+    # Verificar si el directorio existe
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
     if not os.path.exists(dir_path):
         print(f"Error: El directorio '{dir_path}' no existe.")
         return  # Terminar el programa si el directorio no se encuentra
     # Variable para verificar si se encontraron archivos PNG
     found_png_files = False
     right_answers = ["C", "B", "A", "D", "B", "B", "A", "B", "D", "D"]
-    answers = []
     exams = []
     # Analizar cada examen
     for file in os.listdir(dir_path):
         if file.endswith('.png'):  # Solo procesar archivos PNG
+<<<<<<< HEAD
             found_png_files = True
             image = cv2.imread(os.path.join(dir_path, file))
             image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -342,12 +496,28 @@ def main():
                 lines_answer, lines_answer_coords = identify_lines(questions)
                 answer = indetify_answers(lines_answer)
                 answers.append(answer)
+=======
+            image = cv2.imread(os.path.join(dir_path, file),cv2.IMREAD_GRAYSCALE)
+            if image is not None:
+                found_png_files = True
+                id = file
+                # Procesar encabezado y preguntas
+                header, _, questions, _ = identify_questions(image)
+                img_name, name, date, class_n = analyze_header(header)
+                # Identificar las respuestas
+                lines_answer, _ = identify_lines(questions)
+                answer = identify_answers(lines_answer)
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
                 # Crear un nuevo diccionario para el examen actual
                 exam = {
                     "id": id,
                     "name": name,
                     "date": date,
+<<<<<<< HEAD
                     "img_name":img_name,
+=======
+                    "img_name": img_name,
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
                     "class": class_n,
                     "answers": {},
                     "passed": ""
@@ -371,6 +541,7 @@ def main():
     results_to_screen(exams)
     results_to_csv(dir_path, exams)
     results_to_txt(dir_path, exams)
+<<<<<<< HEAD
     results_to_img(exams)
 
 
@@ -440,3 +611,10 @@ if __name__ == "__main__":
 # inverted_image = cv2.bitwise_not(image)
 #---------------
 # inverted_image = 255 - image
+=======
+    results_to_img(dir_path, exams)
+    input("Presione Enter para continuar...")
+
+if __name__ == "__main__":
+    main()
+>>>>>>> 791e837b79a28c8c5137b0a9b7d7ee69186730ca
