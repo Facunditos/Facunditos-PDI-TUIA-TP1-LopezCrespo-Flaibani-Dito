@@ -51,12 +51,12 @@ len(np.unique(image))
 # Los pixeles que no son negros en la imagen, se pasan a blanco
 prueba = image.copy()
 prueba[prueba > 0] = 255
-# imshow(prueba)
+imshow(prueba)
 
 # Los pixeles que con valor menor a 228 en la imagen, se pasan a negro
 prueba = image.copy()
 prueba[prueba < 228] = 0
-# imshow(prueba)
+imshow(prueba)
 
 # prueba = image.copy()
 # prueba[prueba != 10] = 255
