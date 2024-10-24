@@ -103,16 +103,8 @@ Detecta y separa las zonas de cada pregunta en la imagen
 '''
 def identify_questions(image: np.ndarray) -> tuple:
     th = image.max() * 0.9
-    img_th = image < th
-    img_rows = np.sum(img_th,1)
-    q_pix_unique = np.unique(img_rows)
-    q_pix_unique
-    th_row = 400
-    img_rows_th = img_rows > th_row
-    img_rows_th
-    idx_1_lin_h = np.argwhere(img_rows_th)[0,0]
-    image_binary_header = img_th[:(idx_1_lin_h+1),:]
-    # image_binary_header = cv2.threshold(image, 0, 230, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # image_binary_header = cv2.threshold(image, th, 255, cv2.THRESH_BINARY)[1]
+    image_binary_header = (image > th).astype(np.uint8) * 255
     image_binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     edges = cv2.Canny(image, 100, 170, apertureSize=3)
     # image_lines = image.copy()
@@ -140,9 +132,8 @@ def identify_questions(image: np.ndarray) -> tuple:
     # Ordenar las listas porque Hough no genera las líneas en orden
     lines_v_sorted = sorted(lines_v, key=lambda line: line[0][0])
     lines_h_sorted = sorted(lines_h, key=lambda line: line[0][1])
-    header = image_binary_header.copy() #image_binary1[0:lines_h_sorted[0][0][1] + 3, 0:image.shape[0]]
-    header_coords = (0,lines_h_sorted[0][0][1] + 3, 0,image.shape[0])
-    # imshow(header)
+    header = 255 - image_binary_header[0:lines_h_sorted[0][0][1] + 5, 0:image.shape[0]]
+    header_coords = (0,lines_h_sorted[0][0][1] + 5, 0,image.shape[0])
     questions = []
     questions_coords = []
     # Extraer las preguntas y agregarlas a la lista (columna izquierda)
@@ -323,7 +314,6 @@ def main():
                 id = file
                 # Procesar encabezado y preguntas
                 header, _, questions, _ = identify_questions(image)
-                # header_bool = header == 0
                 img_name, name, date, class_n = analyze_header(header)
                 # Identificar las respuestas
                 lines_answer, _ = identify_lines(questions)
